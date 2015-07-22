@@ -1,0 +1,15 @@
+{% extends 'games/base.html' %}
+
+{% block content %}
+
+  <h1>All games</h1>
+
+  <hr />
+  {% for object in object_list %}
+    <p>
+      <a href="{{ object.get_absolute_url }}">{{ object.name }}</a>
+    </p>
+  {% empty %}
+    No games.
+  {% endfor %}
+{% endblock %}

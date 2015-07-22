@@ -1,12 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+  <title>PlayTerminal</title>
+
+  <style>
+    h1, h2, h3, h4, h5, h6, p, div {
+      font-family: 'Droid Sans Mono', sans-serif;
+    }
+
+    div#sidebar > div {
+      padding: 20px;
+      padding-left: 60px;
+    }
+
+  </style>
+
 </head>
 <body>
 
-{% block content %}{% endblock %}
+<div class="container">
+  <br />
+  <div class="col-md-4">
+    <img src="https://www.samhober.com/howtofoldpocketsquares/Flat1.jpg">
+
+    <div id="sidebar">
+      <div>
+        <a>Games</a>
+      </div>
+
+      <div>
+        <a>About</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-md-8">
+    {% block content %}{% endblock %}
+  </div>
+</div>
 
 </body>
 </html>

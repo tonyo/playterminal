@@ -4,10 +4,10 @@
 
   <h1>{{ object.name }}</h1>
 
-  <p>{{ object.info }}</p>
+  <div style="white-space: pre-wrap;">{{ object.info }}</div>
 
-  <p>Step id: {{ object.step_id }}</p>
+  <p><b>Step id:</b> {{ object.step_id }}</p>
 
-  <button>Play</button>
+  <button class="pure-button">Play</button>
 
 {% endblock %}
