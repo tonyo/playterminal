@@ -9,3 +9,6 @@ class Game(models.Model):
 
     def get_absolute_url(self):
         return reverse('game_detail', args=[self.pk])
+
+    def __str__(self):
+        return self.name

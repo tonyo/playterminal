@@ -1,9 +1,12 @@
 from django.conf.urls import url
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
 from games import views
 
 urlpatterns = [
+    url(r'^$', lambda _: HttpResponseRedirect(reverse('game_list'))),
     url(r'^game/(?P<pk>\d+)/$',
         views.GameDetailView.as_view(), name='game_detail'),
     url(r'^games/$',
