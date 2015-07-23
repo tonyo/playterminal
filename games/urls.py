@@ -13,5 +13,4 @@ urlpatterns = [
         views.GameListView.as_view(), name='game_list'),
     url(r'^about/$',
         TemplateView.as_view(template_name='games/about.html'), name='about'),
-
 ]
