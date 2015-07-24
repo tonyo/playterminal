@@ -12,6 +12,7 @@ STEPIC_API_URL = STEPIC_URL + 'api/'
 
 STEPIC_LOGIN_URL = STEPIC_URL + 'accounts/login/'
 STEPIC_API_ATTEMPTS_URL = STEPIC_API_URL + 'attempts'
+STEPIC_API_ATTEMPT_URL = STEPIC_API_ATTEMPTS_URL + '/{id}'
 
 
 class LoginError(Exception):
@@ -67,6 +68,15 @@ class StepicClient(object):
         if res.status_code != 302:
             raise LoginError()
         self._is_logged_in = True
+
+    def get_attempt(self, id):
+        if not self._is_logged_in:
+            self._login()
+        res = self._request('GET', STEPIC_API_ATTEMPT_URL.format(id=id))
+        if res.status_code == 404:
+            return None
+        res.raise_for_status()
+        return res.json()['attempts'][0]
 
     def create_attempt(self, step_id):
         if not self._is_logged_in:
