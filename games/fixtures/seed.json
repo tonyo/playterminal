@@ -1,356 +1,382 @@
 [
 {
-    "model": "contenttypes.contenttype",
     "pk": 1,
     "fields": {
-        "model": "logentry",
-        "app_label": "admin"
-    }
+        "app_label": "admin",
+        "model": "logentry"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 2,
     "fields": {
-        "model": "permission",
-        "app_label": "auth"
-    }
+        "app_label": "auth",
+        "model": "permission"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 3,
     "fields": {
-        "model": "group",
-        "app_label": "auth"
-    }
+        "app_label": "auth",
+        "model": "group"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 4,
     "fields": {
-        "model": "user",
-        "app_label": "auth"
-    }
+        "app_label": "auth",
+        "model": "user"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 5,
     "fields": {
-        "model": "contenttype",
-        "app_label": "contenttypes"
-    }
+        "app_label": "contenttypes",
+        "model": "contenttype"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 6,
     "fields": {
-        "model": "session",
-        "app_label": "sessions"
-    }
+        "app_label": "sessions",
+        "model": "session"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "contenttypes.contenttype",
     "pk": 7,
     "fields": {
-        "model": "game",
-        "app_label": "games"
-    }
+        "app_label": "games",
+        "model": "game"
+    },
+    "model": "contenttypes.contenttype"
 },
 {
-    "model": "sessions.session",
     "pk": "94qb51azu3mb01m8kpg865dg9c0grw19",
     "fields": {
         "session_data": "OGI1ODIxY2ZiYjVlNGRmYjUyMzVmZWJmNWE4NWNjYTk1M2I4NWM5Nzp7Il9hdXRoX3VzZXJfaGFzaCI6ImY3ZTRjNzQwMWQ5NGFhMjEyYzhmYWE0NjU4YmE3YmI5YjMxMmFiMWQiLCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIn0=",
         "expire_date": "2015-08-05T12:45:02.318Z"
-    }
+    },
+    "model": "sessions.session"
 },
 {
-    "model": "games.game",
     "pk": 1,
     "fields": {
-        "step_id": 1234,
         "info": "Greed project is a strategy game.\r\n\r\nTry to eat as much as possible of the board before munching yourself into a corner.\r\n\r\nThe object of Greed is to erase as much of the screen as possible by moving around in a grid of numbers. To move your cursor, simply use your arrow keys or the the 'hjklyubn' keys or your numberic Your location is signified by the @ symbol.\r\n\r\nWhen you move in a direction, you erase N number of grid squares in that direction, N being the first number in that direction. Your score reflects the total number of squares eaten.\r\n\r\nGreed will not let you make a move that would have placed you off the grid or over a previously eaten square. If no valid moves exist, your game ends.",
-        "name": "Greed"
-    }
+        "name": "Greed",
+        "step_id": 31258
+    },
+    "model": "games.game"
 },
 {
-    "model": "games.game",
     "pk": 2,
     "fields": {
-        "step_id": 2345,
         "info": "NetHack is a single-player roguelike video game originally released in 1987 with ASCII graphics. It is a descendant of an earlier game called Hack (1985), which is a descendant of Rogue (1980). \r\n\r\nOn the surface, the game is a hack'n'slash Dungeons and Dragons clone, but its subtle sense of humor and intellectual rigor elevate it from the faintly nerdy to the sharply geeky. ",
-        "name": "NetHack"
-    }
+        "name": "NetHack",
+        "step_id": 36066
+    },
+    "model": "games.game"
 },
 {
-    "model": "auth.permission",
     "pk": 1,
     "fields": {
-        "codename": "add_logentry",
+        "content_type": 1,
         "name": "Can add log entry",
-        "content_type": 1
-    }
+        "codename": "add_logentry"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 2,
     "fields": {
-        "codename": "change_logentry",
+        "content_type": 1,
         "name": "Can change log entry",
-        "content_type": 1
-    }
+        "codename": "change_logentry"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 3,
     "fields": {
-        "codename": "delete_logentry",
+        "content_type": 1,
         "name": "Can delete log entry",
-        "content_type": 1
-    }
+        "codename": "delete_logentry"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 4,
     "fields": {
-        "codename": "add_permission",
+        "content_type": 2,
         "name": "Can add permission",
-        "content_type": 2
-    }
+        "codename": "add_permission"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 5,
     "fields": {
-        "codename": "change_permission",
+        "content_type": 2,
         "name": "Can change permission",
-        "content_type": 2
-    }
+        "codename": "change_permission"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 6,
     "fields": {
-        "codename": "delete_permission",
+        "content_type": 2,
         "name": "Can delete permission",
-        "content_type": 2
-    }
+        "codename": "delete_permission"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 7,
     "fields": {
-        "codename": "add_group",
+        "content_type": 3,
         "name": "Can add group",
-        "content_type": 3
-    }
+        "codename": "add_group"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 8,
     "fields": {
-        "codename": "change_group",
+        "content_type": 3,
         "name": "Can change group",
-        "content_type": 3
-    }
+        "codename": "change_group"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 9,
     "fields": {
-        "codename": "delete_group",
+        "content_type": 3,
         "name": "Can delete group",
-        "content_type": 3
-    }
+        "codename": "delete_group"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 10,
     "fields": {
-        "codename": "add_user",
+        "content_type": 4,
         "name": "Can add user",
-        "content_type": 4
-    }
+        "codename": "add_user"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 11,
     "fields": {
-        "codename": "change_user",
+        "content_type": 4,
         "name": "Can change user",
-        "content_type": 4
-    }
+        "codename": "change_user"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 12,
     "fields": {
-        "codename": "delete_user",
+        "content_type": 4,
         "name": "Can delete user",
-        "content_type": 4
-    }
+        "codename": "delete_user"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 13,
     "fields": {
-        "codename": "add_contenttype",
+        "content_type": 5,
         "name": "Can add content type",
-        "content_type": 5
-    }
+        "codename": "add_contenttype"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 14,
     "fields": {
-        "codename": "change_contenttype",
+        "content_type": 5,
         "name": "Can change content type",
-        "content_type": 5
-    }
+        "codename": "change_contenttype"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 15,
     "fields": {
-        "codename": "delete_contenttype",
+        "content_type": 5,
         "name": "Can delete content type",
-        "content_type": 5
-    }
+        "codename": "delete_contenttype"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 16,
     "fields": {
-        "codename": "add_session",
+        "content_type": 6,
         "name": "Can add session",
-        "content_type": 6
-    }
+        "codename": "add_session"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 17,
     "fields": {
-        "codename": "change_session",
+        "content_type": 6,
         "name": "Can change session",
-        "content_type": 6
-    }
+        "codename": "change_session"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 18,
     "fields": {
-        "codename": "delete_session",
+        "content_type": 6,
         "name": "Can delete session",
-        "content_type": 6
-    }
+        "codename": "delete_session"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 19,
     "fields": {
-        "codename": "add_game",
+        "content_type": 7,
         "name": "Can add game",
-        "content_type": 7
-    }
+        "codename": "add_game"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 20,
     "fields": {
-        "codename": "change_game",
+        "content_type": 7,
         "name": "Can change game",
-        "content_type": 7
-    }
+        "codename": "change_game"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.permission",
     "pk": 21,
     "fields": {
-        "codename": "delete_game",
+        "content_type": 7,
         "name": "Can delete game",
-        "content_type": 7
-    }
+        "codename": "delete_game"
+    },
+    "model": "auth.permission"
 },
 {
-    "model": "auth.user",
     "pk": 1,
     "fields": {
-        "date_joined": "2015-07-22T12:44:59.145Z",
-        "is_active": true,
-        "groups": [],
-        "first_name": "",
-        "username": "admin",
         "is_superuser": true,
+        "last_login": "2015-07-22T12:45:02.163Z",
+        "password": "pbkdf2_sha256$20000$BiyrcuAq8shC$iVspqqsvbBrBwxVVMkuhUyCrky5Qkn0udIW+62xjGoE=",
+        "first_name": "",
+        "user_permissions": [],
+        "username": "admin",
+        "date_joined": "2015-07-22T12:44:59.145Z",
         "email": "",
         "is_staff": true,
-        "password": "pbkdf2_sha256$20000$BiyrcuAq8shC$iVspqqsvbBrBwxVVMkuhUyCrky5Qkn0udIW+62xjGoE=",
-        "last_name": "",
-        "last_login": "2015-07-22T12:45:02.163Z",
-        "user_permissions": []
-    }
+        "is_active": true,
+        "groups": [],
+        "last_name": ""
+    },
+    "model": "auth.user"
 },
 {
-    "model": "admin.logentry",
     "pk": 1,
     "fields": {
         "change_message": "",
-        "action_time": "2015-07-22T13:05:14.109Z",
-        "object_id": "1",
         "content_type": 7,
         "user": 1,
+        "action_flag": 1,
+        "action_time": "2015-07-22T13:05:14.109Z",
         "object_repr": "Game object",
-        "action_flag": 1
-    }
+        "object_id": "1"
+    },
+    "model": "admin.logentry"
 },
 {
-    "model": "admin.logentry",
     "pk": 2,
     "fields": {
         "change_message": "Changed info.",
-        "action_time": "2015-07-22T13:59:03.068Z",
-        "object_id": "1",
         "content_type": 7,
         "user": 1,
+        "action_flag": 2,
+        "action_time": "2015-07-22T13:59:03.068Z",
         "object_repr": "Game object",
-        "action_flag": 2
-    }
+        "object_id": "1"
+    },
+    "model": "admin.logentry"
 },
 {
-    "model": "admin.logentry",
     "pk": 3,
     "fields": {
         "change_message": "Changed info.",
-        "action_time": "2015-07-22T14:02:21.191Z",
-        "object_id": "1",
         "content_type": 7,
         "user": 1,
+        "action_flag": 2,
+        "action_time": "2015-07-22T14:02:21.191Z",
         "object_repr": "Game object",
-        "action_flag": 2
-    }
+        "object_id": "1"
+    },
+    "model": "admin.logentry"
 },
 {
-    "model": "admin.logentry",
     "pk": 4,
     "fields": {
         "change_message": "Changed info.",
-        "action_time": "2015-07-22T16:35:52.570Z",
-        "object_id": "1",
         "content_type": 7,
         "user": 1,
+        "action_flag": 2,
+        "action_time": "2015-07-22T16:35:52.570Z",
         "object_repr": "Greed",
-        "action_flag": 2
-    }
+        "object_id": "1"
+    },
+    "model": "admin.logentry"
 },
 {
-    "model": "admin.logentry",
     "pk": 5,
     "fields": {
         "change_message": "",
-        "action_time": "2015-07-22T16:45:18.839Z",
-        "object_id": "2",
         "content_type": 7,
         "user": 1,
+        "action_flag": 1,
+        "action_time": "2015-07-22T16:45:18.839Z",
         "object_repr": "NetHack",
-        "action_flag": 1
-    }
+        "object_id": "2"
+    },
+    "model": "admin.logentry"
+},
+{
+    "pk": 6,
+    "fields": {
+        "change_message": "Changed step_id.",
+        "content_type": 7,
+        "user": 1,
+        "action_flag": 2,
+        "action_time": "2015-07-24T12:40:50.296Z",
+        "object_repr": "NetHack",
+        "object_id": "2"
+    },
+    "model": "admin.logentry"
+},
+{
+    "pk": 7,
+    "fields": {
+        "change_message": "Changed step_id.",
+        "content_type": 7,
+        "user": 1,
+        "action_flag": 2,
+        "action_time": "2015-07-24T12:41:56.193Z",
+        "object_repr": "Greed",
+        "object_id": "1"
+    },
+    "model": "admin.logentry"
 }
 ]
