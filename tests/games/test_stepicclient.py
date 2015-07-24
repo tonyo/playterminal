@@ -1,15 +1,15 @@
-def test_login(client):
-    assert not client._is_logged_in
+def test_login(stepic_client):
+    assert not stepic_client._is_logged_in
 
-    client._login()
+    stepic_client._login()
 
-    assert client._is_logged_in
+    assert stepic_client._is_logged_in
 
 
-def test_create_attempt(client):
+def test_create_attempt(stepic_client):
     step_id = 18269  # multiple choice problem from Epic Guide
 
-    attempt = client.create_attempt(step_id)
+    attempt = stepic_client.create_attempt(step_id)
 
     assert attempt['step'] == step_id
     assert attempt['status'] == 'active'
