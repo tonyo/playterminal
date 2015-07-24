@@ -11,19 +11,27 @@ STEPIC_URL = 'https://stepic.org/'
 STEPIC_API_URL = STEPIC_URL + 'api/'
 
 STEPIC_LOGIN_URL = STEPIC_URL + 'accounts/login/'
+STEPIC_API_ATTEMPTS_URL = STEPIC_API_URL + 'attempts'
 
 
 class LoginError(Exception):
     """An exception raised when login failed."""
 
 
+class StepicError(Exception):
+    """An error occurred on the Stepic side."""
+
+
 class StepicClient(object):
     def __init__(self, login, password):
         self.login = login
         self.password = password
-        self.headers = {'Content-Type': 'application/json'}
         self.session = requests.Session()
-        self.session.headers.update({'Referer': STEPIC_URL})
+        headers = {
+            'Content-Type': 'application/json',
+            'Referer': STEPIC_URL,
+        }
+        self.session.headers.update(headers)
         self._is_logged_in = False
 
     def _request(self, method, url, is_json=True, **kwargs):
@@ -31,9 +39,12 @@ class StepicClient(object):
                      method.upper(), url, kwargs.get('data'))
         if is_json and 'data' in kwargs:
             kwargs['data'] = json.dumps(kwargs['data'])
+        if not is_json:
+            headers = kwargs.get('headers', {})
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            kwargs['headers'] = headers
 
         res = self.session.request(method, url, **kwargs)
-        print("### res", res.status_code, res.text)
         if not res:
             logger.info("StepicClient response: %s %s on request: %s %s | "
                         "body: %s", res.status_code, res.content,
@@ -56,3 +67,16 @@ class StepicClient(object):
         if res.status_code != 302:
             raise LoginError()
         self._is_logged_in = True
+
+    def create_attempt(self, step_id):
+        if not self._is_logged_in:
+            self._login()
+        extra_headers = {'X-CSRFToken': self.session.cookies['csrftoken']}
+        data = {'attempt': {'step': step_id}}
+        res = self._request('POST', STEPIC_API_ATTEMPTS_URL,
+                            headers=extra_headers, data=data)
+        res.raise_for_status()
+        res_json = res.json()
+        if not res_json['attempts']:
+            raise StepicError("Stepic didn't return an attempt")
+        return res_json['attempts'][0]
