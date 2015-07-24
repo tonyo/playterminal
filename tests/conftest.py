@@ -1,5 +1,6 @@
 import pytest
 
+from games.models import Game
 from games.utils.stepicclient import StepicClient
 
 
@@ -21,13 +22,10 @@ def password(request):
 
 
 @pytest.fixture
-def client(login, password):
+def stepic_client(login, password):
     return StepicClient(login, password)
 
 
-def test_login(client):
-    assert client._csrftoken is None
-
-    client._login()
-
-    assert client._csrftoken
+@pytest.fixture
+def game(db):
+    return Game.objects.create(step_id=36066, info='yo game')
