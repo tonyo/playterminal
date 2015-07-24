@@ -6,18 +6,18 @@ def test_login(stepic_client):
     assert stepic_client._is_logged_in
 
 
-def test_get_non_existent_attempt(client):
+def test_get_non_existent_attempt(stepic_client):
     attempt_id = 2718281828459
 
-    attempt = client.get_attempt(attempt_id)
+    attempt = stepic_client.get_attempt(attempt_id)
 
     assert attempt is None
 
 
-def test_get_attempt(client):
+def test_get_attempt(stepic_client):
     attempt_id = 4729799
 
-    attempt = client.get_attempt(attempt_id)
+    attempt = stepic_client.get_attempt(attempt_id)
 
     assert attempt['id'] == attempt_id
     assert attempt['status'] == 'cleanedup'
