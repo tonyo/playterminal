@@ -23,11 +23,3 @@ def password(request):
 @pytest.fixture
 def client(login, password):
     return StepicClient(login, password)
-
-
-def test_login(client):
-    assert client._csrftoken is None
-
-    client._login()
-
-    assert client._csrftoken
