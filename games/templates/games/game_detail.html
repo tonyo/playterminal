@@ -11,6 +11,12 @@
   <p><b>Step id:</b> {{ object.step_id }}</p>
 
   <br />
-  <button class="btn btn-info">Play</button>
+  <button id="open-terminal-btn" class="btn btn-info">Play</button>
 
+
+  <script>
+    var gamesApiUrl = "{% url 'games' %}";
+    var gameId = {{ object.id }};
+    var csrfToken = "{{ csrf_token }}";
+  </script>
 {% endblock %}
