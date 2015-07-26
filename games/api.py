@@ -1,4 +1,6 @@
 import json
+
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
@@ -6,16 +8,14 @@ from django.views.decorators.http import require_POST
 from games.models import Game
 from games.utils.stepicclient import StepicClient
 
-STEPIC_LOGIN = 'stepic@playtermin.al'
-STEPIC_PASSWORD = 'LzTspUE7PIucxuX5'
-
 
 @require_POST
 def games(request):
     data = json.loads(request.body.decode())
     game_id = data.get('id')
     game = get_object_or_404(Game, id=game_id)
-    stepic_client = StepicClient(login=STEPIC_LOGIN, password=STEPIC_PASSWORD)
+    stepic_client = StepicClient(login=settings.STEPIC_LOGIN,
+                                 password=settings.STEPIC_PASSWORD)
     game_sessions_map = request.session.get('game_sessions', {})
 
     request_new_attempt = True
