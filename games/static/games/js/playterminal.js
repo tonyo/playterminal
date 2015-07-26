@@ -1,14 +1,12 @@
 $(document).ready(function() {
-
-    $('#open-terminal-btn').click(function() {
+    $("#open-terminal-btn").click(function() {
         $.ajax({
             url: gamesApiUrl,
             dataType: "json",
             method: "POST",
-            data: '{"id": ' + gameId + '}',
-            contentType: 'application/json',
-            beforeSend: function(request)
-            {
+            data: JSON.stringify({"id": gameId}),
+            contentType: "application/json",
+            beforeSend: function(request) {
                 request.setRequestHeader("X-CSRFToken", csrfToken);
             }
         }).done(function(result) {
