@@ -4,5 +4,6 @@ h1, h2, h3, h4, h5, h6, p, div {
 
 div#sidebar > div {
     padding: 20px;
-    padding-left: 60px;
+    padding-left: 40px;
+    font-size: 20px;
 }
