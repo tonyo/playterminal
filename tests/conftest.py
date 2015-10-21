@@ -1,14 +1,9 @@
 import pytest
 
+from django.conf import settings
+
 from games.models import Game
 from games.utils.stepicclient import StepicClient
-
-
-def pytest_addoption(parser):
-    parser.addoption('--login', action='store', default='',
-                     help="Stepic user login")
-    parser.addoption('--password', action='store', default='',
-                     help="Stepic user password")
 
 
 @pytest.fixture
@@ -22,8 +17,9 @@ def password(request):
 
 
 @pytest.fixture
-def stepic_client(login, password):
-    return StepicClient(login, password)
+def stepic_client():
+    return StepicClient(settings.STEPIC_CLIENT_ID,
+                        settings.STEPIC_CLIENT_SECRET)
 
 
 @pytest.fixture
