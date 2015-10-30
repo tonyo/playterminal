@@ -8,7 +8,7 @@
 
   `cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py`
 
-3. Update SECRET_KEY, STEPIC_LOGIN, etc.
+3. Update SECRET_KEY, STEPIC_CLIENT_ID, etc.
 
   `vim playterminal/settings/secrets.py` 
 

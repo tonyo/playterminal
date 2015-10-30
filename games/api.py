@@ -14,8 +14,8 @@ def games(request):
     data = json.loads(request.body.decode())
     game_id = data.get('id')
     game = get_object_or_404(Game, id=game_id)
-    stepic_client = StepicClient(login=settings.STEPIC_LOGIN,
-                                 password=settings.STEPIC_PASSWORD)
+    stepic_client = StepicClient(settings.STEPIC_CLIENT_ID,
+                                 settings.STEPIC_CLIENT_SECRET)
     game_sessions_map = request.session.get('game_sessions', {})
 
     request_new_attempt = True

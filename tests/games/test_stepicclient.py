@@ -1,9 +1,5 @@
-def test_login(stepic_client):
-    assert not stepic_client._is_logged_in
-
-    stepic_client._login()
-
-    assert stepic_client._is_logged_in
+def test_oauth_token(stepic_client):
+    assert stepic_client.token is not None
 
 
 def test_get_non_existent_attempt(stepic_client):
