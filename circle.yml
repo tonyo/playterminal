@@ -5,6 +5,7 @@ machine:
 dependencies:
   override:
     - pip install -r requirements/local.txt
+    - cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py 
 
 test:
   override:
