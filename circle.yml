@@ -2,6 +2,10 @@ machine:
   python:
     version: 3.4.2
 
+dependencies:
+  override:
+    - pip install -r requirements/local.txt
+
 test:
   override:
     - py.test tests/
