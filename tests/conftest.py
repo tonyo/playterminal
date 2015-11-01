@@ -3,7 +3,7 @@ import pytest
 from django.conf import settings
 
 from games.models import Game
-from games.utils.stepicclient import StepicClient
+from games.utils.stepic_client import StepicClient
 
 
 @pytest.fixture

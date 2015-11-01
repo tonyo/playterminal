@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
 from games.models import Game
-from games.utils.stepicclient import StepicClient
+from games.utils.stepic_client import StepicClient
 
 
 @require_POST
