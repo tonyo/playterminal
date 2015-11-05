@@ -101,3 +101,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Try to get the secrets values from the environment
+secret_vars = ['SECRET_KEY', 'STEPIC_CLIENT_ID', 'STEPIC_CLIENT_SECRET']
+for var in secret_vars:
+    value = os.getenv(var)
+    if value:
+        globals()[var] = value

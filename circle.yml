@@ -1,0 +1,13 @@
+machine:
+  python:
+    version: 3.4.2
+
+dependencies:
+  override:
+    - pip install -r requirements/local.txt
+    - cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py 
+
+test:
+  override:
+    - py.test tests/
+    - flake8 .
