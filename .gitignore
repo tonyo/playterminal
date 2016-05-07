@@ -1,4 +1,6 @@
 .*.swp
+*.pyc
 .idea
 __pycache__
+.cache
 *.sqlite3

@@ -1,5 +1,6 @@
 import pytest
 
+import rootnroll
 from django.conf import settings
 
 from games.models import Game
@@ -24,4 +25,12 @@ def stepic_client():
 
 @pytest.fixture
 def game(db):
-    return Game.objects.create(step_id=36066, info='yo game')
+    return Game.objects.create(step_id=36066, info='yo game',
+                               rnr_image_id=9)
+
+
+@pytest.fixture
+def rootnroll_client():
+    return rootnroll.RootnRollClient(username=settings.ROOTNROLL_USERNAME,
+                                     password=settings.ROOTNROLL_PASSWORD,
+                                     api_url='https://rootnroll.com/api')

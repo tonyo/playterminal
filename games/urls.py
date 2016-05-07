@@ -15,6 +15,6 @@ urlpatterns = [
     url(r'^about/$',
         TemplateView.as_view(template_name='games/about.html'), name='about'),
 
-    url(r'^api/games/$',
-        games, name='games'),
+    url(r'^api/terminals/$',
+        games, name='terminals'),
 ]

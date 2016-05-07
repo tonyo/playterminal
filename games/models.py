@@ -5,6 +5,8 @@ from django.db import models
 class Game(models.Model):
     name = models.CharField(max_length=50)
     info = models.TextField()
+    rnr_image_id = models.IntegerField(null=True)
+    # TODO remove
     step_id = models.IntegerField()
 
     def get_absolute_url(self):
