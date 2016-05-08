@@ -102,6 +102,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+RNR_API_URL = 'https://rootnroll.com/api'
+
 # Try to get the secrets values from the environment
 secret_vars = ['SECRET_KEY', 'STEPIC_CLIENT_ID', 'STEPIC_CLIENT_SECRET']
 for var in secret_vars:

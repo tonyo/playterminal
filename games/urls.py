@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView
 
 from games import views
-from games.api import games
+from games.api import terminals
 
 urlpatterns = [
     url(r'^$', lambda _: HttpResponseRedirect(reverse('game_list'))),
@@ -16,5 +16,5 @@ urlpatterns = [
         TemplateView.as_view(template_name='games/about.html'), name='about'),
 
     url(r'^api/terminals/$',
-        games, name='terminals'),
+        terminals, name='terminals'),
 ]

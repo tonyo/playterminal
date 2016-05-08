@@ -16,22 +16,34 @@ def test_simple_rootnroll_request(rootnroll_client):
     assert 'count' in response
 
 
-def test_new_game_session(game, client):
+def test_new_game_session(game, client, fake_rootnroll_client):
     response = _post_json(client, reverse('terminals'), {'id': game.id})
 
+    # First request => server is starting
     assert response.status_code == 200
-    game_session = json.loads(response.content.decode())
-    for key in ['id', 'image_id', 'status']:
-        assert game_session[key]
+    data = json.loads(response.content.decode())
+    assert data == {'status': 'creating'}
 
-    # Request once again, expect that the previous session is returned
     response = _post_json(client, reverse('terminals'), {'id': game.id})
 
-    new_game_session = json.loads(response.content.decode())
-    assert new_game_session == game_session
+    # Second request => terminal is ready
+    assert response.status_code == 200
+    data = json.loads(response.content.decode())
+    assert data == {
+        'status': 'ok',
+        'terminal_id': '234',
+        'kaylee_url': 'https://ku/api'
+    }
+
+    # Request once again, expect that the previous terminal is returned
+    response = _post_json(client, reverse('terminals'), {'id': game.id})
+
+    data2 = json.loads(response.content.decode())
+    assert data == data2
 
 
 def test_outdated_game_session(game, client):
+    mocked_rnr_client = mocker.patch('games.api.RootnRollClient')
     _post_json(client, reverse('terminals'), {'id': game.id})
 
     # Update the game session

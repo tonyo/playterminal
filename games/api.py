@@ -5,33 +5,81 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
+from rootnroll import RootnRollClient
+from rootnroll.constants import ServerStatus
+
 from games.models import Game
-from games.utils.stepic_client import StepicClient
+
+"""
+Session structure:
+
+game_id -> {'server_id': '123...',
+            'terminal_id': '234...',}
+
+"""
+
+
+def _terminal_response_ok(terminal):
+    return JsonResponse({
+        'status': 'ok',
+        'terminal_id': terminal['id'],
+        'kaylee_url': terminal['config']['kaylee_url'],
+    })
+
+
+def _terminal_response_creating():
+    return JsonResponse({
+        'status': 'creating',
+    })
+
+
+def _terminal_response_error():
+    JsonResponse({
+        'status': 'error',
+    })
 
 
 @require_POST
-def games(request):
+def terminals(request):
     data = json.loads(request.body.decode())
     game_id = data.get('id')
     game = get_object_or_404(Game, id=game_id)
-    stepic_client = StepicClient(settings.STEPIC_CLIENT_ID,
-                                 settings.STEPIC_CLIENT_SECRET)
-    game_sessions_map = request.session.get('game_sessions', {})
+    rnr_client = RootnRollClient(username=settings.ROOTNROLL_USERNAME,
+                                 password=settings.ROOTNROLL_PASSWORD,
+                                 api_url=settings.RNR_API_URL)
+    terminals_map = request.session.get('terminals_map', {})
+    game_dict = terminals_map.get(str(game_id), {})
+    server_id = game_dict.get('server_id')
+    terminal_id = game_dict.get('terminal_id')
 
-    request_new_attempt = True
-    if str(game_id) in game_sessions_map:
-        # Check that the attempt is still active
-        attempt_id = game_sessions_map[str(game_id)]['stepic_attempt_id']
-        remote_attempt = stepic_client.get_attempt(attempt_id)
-        if remote_attempt['status'] == 'active':
-            request_new_attempt = False
+    if terminal_id:
+        # Active terminal exists
+        terminal = rnr_client.get_terminal(terminal_id)
+        if terminal:
+            return _terminal_response_ok(terminal)
 
-    if request_new_attempt:
-        attempt = stepic_client.create_attempt(game.step_id)
-        # Save attempt id for future use
-        attempt['dataset']['stepic_attempt_id'] = attempt['id']
-        game_sessions_map[str(game_id)] = attempt['dataset']
+    if server_id:
+        # Server exists?
+        server = rnr_client.get_server(server_id)
+        if server and server['status'] == ServerStatus.ACTIVE:
+            # Server is ready, create a terminal
+            terminal = rnr_client.create_terminal(server)
+            if terminal:
+                game_dict['terminal_id'] = terminal['id']
+                terminals_map[str(game_id)] = game_dict
+                request.session['terminals_map'] = terminals_map
+                return _terminal_response_ok(terminal)
+        elif server and server['status'] != ServerStatus.ERROR:
+            # Waiting for server to come up
+            return _terminal_response_creating()
 
-    game_session = game_sessions_map[str(game_id)]
-    request.session['game_sessions'] = game_sessions_map
-    return JsonResponse(game_session)
+    # Server does not exist or invalid
+    server = rnr_client.create_server(game.rnr_image_id)
+    if server:
+        game_dict['server_id'] = server['id']
+        terminals_map[str(game_id)] = game_dict
+        request.session['terminals_map'] = terminals_map
+        return _terminal_response_creating()
+    else:
+        # Cannot create the server
+        return _terminal_response_error()
