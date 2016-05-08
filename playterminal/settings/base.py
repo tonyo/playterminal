@@ -105,7 +105,7 @@ STATIC_URL = '/static/'
 RNR_API_URL = 'https://rootnroll.com/api'
 
 # Try to get the secrets values from the environment
-secret_vars = ['SECRET_KEY', 'STEPIC_CLIENT_ID', 'STEPIC_CLIENT_SECRET']
+secret_vars = ['SECRET_KEY', 'ROOTNROLL_USERNAME', 'ROOTNROLL_PASSWORD']
 for var in secret_vars:
     value = os.getenv(var)
     if value:
