@@ -1,12 +1,10 @@
 from unittest.mock import MagicMock
 
 import pytest
-
 import rootnroll
 from django.conf import settings
 
 from games.models import Game
-from games.utils.stepic_client import StepicClient
 
 
 @pytest.fixture
@@ -17,12 +15,6 @@ def login(request):
 @pytest.fixture
 def password(request):
     return request.config.getoption('password')
-
-
-@pytest.fixture
-def stepic_client():
-    return StepicClient(settings.STEPIC_CLIENT_ID,
-                        settings.STEPIC_CLIENT_SECRET)
 
 
 @pytest.fixture

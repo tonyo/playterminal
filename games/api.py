@@ -39,14 +39,18 @@ def _terminal_response_error():
     })
 
 
+def get_rnr_client():
+    return RootnRollClient(username=settings.ROOTNROLL_USERNAME,
+                           password=settings.ROOTNROLL_PASSWORD,
+                           api_url=settings.RNR_API_URL)
+
+
 @require_POST
 def terminals(request):
     data = json.loads(request.body.decode())
     game_id = data.get('id')
     game = get_object_or_404(Game, id=game_id)
-    rnr_client = RootnRollClient(username=settings.ROOTNROLL_USERNAME,
-                                 password=settings.ROOTNROLL_PASSWORD,
-                                 api_url=settings.RNR_API_URL)
+    rnr_client = get_rnr_client()
     terminals_map = request.session.get('terminals_map', {})
     game_dict = terminals_map.get(str(game_id), {})
     server_id = game_dict.get('server_id')

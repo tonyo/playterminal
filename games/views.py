@@ -9,3 +9,6 @@ class GameDetailView(DetailView):
 
 class GameListView(ListView):
     model = Game
+
+    def get_queryset(self):
+        return super().get_queryset().filter(displayed=True)

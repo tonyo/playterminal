@@ -8,6 +8,7 @@ class Game(models.Model):
     rnr_image_id = models.IntegerField(null=True)
     # TODO remove
     step_id = models.IntegerField()
+    displayed = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('game_detail', args=[self.pk])
