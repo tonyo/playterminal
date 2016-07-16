@@ -1,5 +1,4 @@
 Django==1.8.13
-flake8==2.4.1
 requests==2.7.0
 
 # Root'n'Roll API client
