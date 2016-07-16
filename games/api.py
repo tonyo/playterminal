@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from requests import RequestException
 
 from rootnroll import RootnRollClient
 from rootnroll.constants import ServerStatus
@@ -33,9 +34,10 @@ def _terminal_response_creating():
     })
 
 
-def _terminal_response_error():
-    JsonResponse({
+def _terminal_response_error(info=None):
+    return JsonResponse({
         'status': 'error',
+        'info': info,
     })
 
 
@@ -78,8 +80,12 @@ def terminals(request):
             return _terminal_response_creating()
 
     # Server does not exist or invalid
-    server = rnr_client.create_server(game.rnr_image_id)
-    if server:
+    try:
+        server = rnr_client.create_server(game.rnr_image_id)
+    except RequestException as e:
+        return _terminal_response_error()
+
+    if server and 'id' in server:
         game_dict['server_id'] = server['id']
         terminals_map[str(game_id)] = game_dict
         request.session['terminals_map'] = terminals_map

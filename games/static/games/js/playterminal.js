@@ -6,6 +6,14 @@ function disablePlayButton() {
     $("#open-terminal-btn").prop('disabled', true);
 }
 
+function displayError() {
+    var $statusMessage = $('#status-message');
+    $statusMessage.text('Something went wrong. Try again in a few minutes.')
+                  .show(200);
+    enablePlayButton();
+    $("body").css("cursor", "default");
+}
+
 function requestTerminal(timeout) {
     /* Run the AJAX request and sleep for 'timeout' if the terminal is not ready */
 
@@ -31,11 +39,11 @@ function requestTerminal(timeout) {
             console.log(result);
             $("body").css("cursor", "default");
             tty.open(result["kaylee_url"], result["terminal_id"]);
+        } else {
+            displayError();
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        $statusMessage.text('Something went wrong. Try again in a few minutes.')
-                      .show(200);
-        enablePlayButton();
+        displayError();
     });
 }
 
