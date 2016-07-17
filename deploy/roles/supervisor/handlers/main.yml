@@ -1,0 +1,6 @@
+---
+- name: reload supervisor
+  shell: supervisorctl reload
+
+- name: reread supervisor config
+  shell: supervisorctl reread && supervisorctl update

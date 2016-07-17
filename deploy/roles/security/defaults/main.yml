@@ -1,0 +1,42 @@
+---
+security_autoupdate_enabled: true
+
+security_ssh_config_path: /etc/ssh/sshd_config
+security_sshd_name: ssh
+
+# Where the iptables/ directory will be placed
+iptables_root: '/home/{{ ansible_ssh_user }}'
+
+iptables_id_comment: 'ansible managed'
+
+iptables_tcp:
+  in:
+    - port: 22
+    - port: 80
+  out:
+    - port: 80
+      restrict:
+        - 192.30.252.0/22 # Github
+    - port: 53
+    - port: 443
+
+iptables_udp:
+  in:
+    - port: 123
+  out:
+    - port: 123
+    - port: 53
+
+iptables_map:
+  tcp: "{{ iptables_tcp }}"
+  udp: "{{ iptables_udp }}"
+
+# A list of custom iptables rules WITHOUT action ('-A', '-D', etc.)
+# Example: 'OUTPUT -p tcp --dport 12345 -j ACCEPT'
+iptables_custom_rules: []
+
+docker_enable_icc: True
+docker_enable_snat: False
+
+enable_firewall: 0
+disable_firewall: 0

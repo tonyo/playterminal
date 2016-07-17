@@ -1,0 +1,13 @@
+---
+- hosts: servers
+  become: yes
+
+  pre_tasks:
+    - name: update apt cache if needed           
+      apt: update_cache=yes cache_valid_time=7200
+
+  roles:
+    - {role: init-host, tags: ['init-host']}
+    - {role: supervisor, tags: ['supervisor']}
+    - {role: security, tags: ['security']}
+    - {role: playterminal, tags: ['playterminal']}

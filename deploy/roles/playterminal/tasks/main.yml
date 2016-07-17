@@ -1,0 +1,40 @@
+---
+- name: clone the Playterminal repository
+  git: repo={{ pt_repo_url }}
+       dest={{ pt_repo_dir }}
+       version=master
+       accept_hostkey=True
+  register: fetch_pt_repo
+  become_user: '{{ pt_user }}'
+
+- name: install Python requirements
+  pip: requirements="{{ pt_repo_dir }}/requirements.txt"
+       virtualenv={{ pt_venv }}
+       virtualenv_python=python3.4
+       extra_args='--exists-action=w --log {{ pt_venv }}/pt_pip.log'
+  become_user: '{{ pt_user }}'
+
+- name: Playterminal, installation smoketest
+  command: '{{ pt_venv }}/bin/python manage.py'
+  args:
+    chdir: '{{ pt_repo_dir }}'
+  changed_when: False
+  become_user: '{{ pt_user }}'
+
+- name: copy supervisor files
+  template: src=supervisor/{{ item.template_file }}
+            dest='{{ supervisor_conf_dir }}/{{ item.result_file }}'
+            owner=root group=root mode=0644
+            backup=yes
+  with_items:
+    - {template_file: playterminal.conf.j2, result_file: playterminal.conf}
+  notify:
+    - reread supervisor config
+  tags: [playterminal.supervisor, playterminal.gunicorn]
+
+- name: deploy actions
+  include: deploy.yml
+  when: pt_deploy
+
+- name: force handlers
+  meta: flush_handlers

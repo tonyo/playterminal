@@ -1,0 +1,21 @@
+---
+- name: install useful packages for debian/ubuntu
+  apt: pkg={{ item }} state=latest
+       update_cache=yes cache_valid_time=7200
+  with_items:
+    - curl
+    - glances
+    - gnupg
+    - htop
+    - iotop
+    - mc
+    - python-setuptools
+    - screen
+    - silversearcher-ag
+    - sudo
+    - sysv-rc-conf
+    - tmux
+    - tree
+    - unzip
+    - vim
+    - wget
