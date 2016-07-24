@@ -36,5 +36,9 @@
   include: deploy.yml
   when: pt_deploy
 
+- name: backup actions
+  include: backups.yml
+  tags: playterminal.backup
+
 - name: force handlers
   meta: flush_handlers

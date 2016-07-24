@@ -1,0 +1,11 @@
+#!/bin/bash
+set -eux
+
+PROJECT_ROOT="{{ pt_repo_dir }}"
+DB_PATH="$PROJECT_ROOT/playterminal/db.sqlite3"
+BACKUP_NAME="pt_db_$(date +'%Y-%m-%d--%H-%M-%S').gz"
+BACKUP_DIR="{{ pt_backup_dir }}"
+BACKUP_PATH="$BACKUP_DIR/$BACKUP_NAME"
+
+gzip <$DB_PATH > $BACKUP_PATH
+chmod 0600 $BACKUP_PATH
