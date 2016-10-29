@@ -42,4 +42,5 @@ def fake_rootnroll_client(mocker):
     )
     mocked_rnr_client.create_terminal = MagicMock(return_value=fake_terminal)
     mocked_rnr_client.get_terminal = MagicMock(return_value=fake_terminal)
+    mocked_rnr_client.list_servers = MagicMock(return_value={"count": 1})
     return mocked_rnr_client

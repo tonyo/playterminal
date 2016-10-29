@@ -1,7 +1,9 @@
 import json
+from unittest.mock import MagicMock
 
 import pytest
 from django.contrib.sessions.backends.db import SessionStore
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 
@@ -41,6 +43,18 @@ def test_new_game_session(game, client, fake_rootnroll_client):
 
     data2 = json.loads(response.content.decode())
     assert data == data2
+
+
+def test_too_many_servers(game, client, fake_rootnroll_client):
+    fake_rootnroll_client.list_servers = MagicMock(
+        return_value={"count": settings.SERVERS_NUMBER_HARD_LIMIT + 1}
+    )
+
+    response = _post_json(client, reverse('terminals'), {'id': game.id})
+
+    assert response.status_code == 200
+    data = json.loads(response.content.decode())
+    assert data["status"] == "error"
 
 
 @pytest.mark.skip()
