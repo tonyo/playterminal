@@ -5,11 +5,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from requests import RequestException
-
 from rootnroll import RootnRollClient
 from rootnroll.constants import ServerStatus
 
 from games.models import Game
+
 
 """
 Session structure:
@@ -49,6 +49,11 @@ def get_rnr_client():
 
 @require_POST
 def terminals(request):
+    """
+    The main API endpoint for getting a terminal.
+
+    TODO: split into several endpoints?
+    """
     data = json.loads(request.body.decode())
     game_id = data.get('id')
     game = get_object_or_404(Game, id=game_id)
@@ -81,6 +86,10 @@ def terminals(request):
 
     # Server does not exist or invalid
     try:
+        # Compute the current number of servers
+        servers_count = rnr_client.list_servers().get("count")
+        if servers_count >= settings.SERVERS_NUMBER_HARD_LIMIT:
+            return _terminal_response_error("No servers available")
         server = rnr_client.create_server(game.rnr_image_id)
     except RequestException as e:
         return _terminal_response_error()

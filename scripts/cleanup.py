@@ -1,6 +1,10 @@
+#!/usr/bin/env python
 """Remove all terminals"""
 import os
+import sys
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(SCRIPT_DIR, os.pardir))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'playterminal.settings.base'
 
 from games.api import get_rnr_client

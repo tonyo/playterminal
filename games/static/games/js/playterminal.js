@@ -6,10 +6,13 @@ function disablePlayButton() {
     $("#open-terminal-btn").prop('disabled', true);
 }
 
-function displayError() {
+function displayError(errorInfo) {
     var $statusMessage = $('#status-message');
-    $statusMessage.text('Something went wrong. Try again in a few minutes.')
-                  .show(200);
+    var errorMessage = 'Something went wrong. Try again in a few minutes. ';
+    if (errorInfo) {
+        errorMessage += 'Error information: ' + errorInfo;
+    }
+    $statusMessage.text(errorMessage).show(200);
     enablePlayButton();
     $("body").css("cursor", "default");
 }
@@ -40,7 +43,8 @@ function requestTerminal(timeout) {
             $("body").css("cursor", "default");
             tty.open(result["kaylee_url"], result["terminal_id"]);
         } else {
-            displayError();
+            var info = result["info"];
+            displayError(info);
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
         displayError();
