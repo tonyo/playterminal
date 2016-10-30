@@ -4,6 +4,7 @@ PlayTerminal is an attempt to bring old-school console gaming back to life. The 
 
 Deployed instance: https://playtermin.al
 
+Repository with games (Docker images): https://github.com/rev112/playterminal-images
 
 
 ### Getting started
