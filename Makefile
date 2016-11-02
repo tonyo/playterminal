@@ -1,5 +1,6 @@
 all:
 	@echo 'Nothing to be done' && exit 1
 
-cleanup:
-	./manage.py shell <scripts/cleanup.py
+clean:
+	find . -name \*.pyc -delete
+	find . -name \*.pyo -delete

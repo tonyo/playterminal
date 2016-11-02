@@ -130,5 +130,5 @@ for var in secret_vars:
 try:
     from .local import *
     print('Loaded local settings')
-except ValueError:
+except ImportError:
     print('Skipping local settings')
