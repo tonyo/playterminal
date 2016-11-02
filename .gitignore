@@ -6,6 +6,7 @@ __pycache__
 *.sqlite3
 collected_static/
 venv/
+local.py
 
 # Archives
 *.gz

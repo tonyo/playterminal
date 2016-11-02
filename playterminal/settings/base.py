@@ -38,6 +38,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+
+    # 3rd party
+    'raven.contrib.django.raven_compat',
+
+    # App
     'games',
 )
 
@@ -112,9 +117,18 @@ RNR_API_URL = 'https://rootnroll.com/api'
 # Maximum number of running servers allowed
 SERVERS_NUMBER_HARD_LIMIT = 200
 
+# Sentry client config
+RAVEN_CONFIG = {}
+
 # Try to get the secrets values from the environment
 secret_vars = ['SECRET_KEY', 'ROOTNROLL_USERNAME', 'ROOTNROLL_PASSWORD']
 for var in secret_vars:
     value = os.getenv(var)
     if value:
         globals()[var] = value
+
+try:
+    from .local import *
+    print('Loaded local settings')
+except ValueError:
+    print('Skipping local settings')
