@@ -17,6 +17,14 @@ function displayError(errorInfo) {
     $("body").css("cursor", "default");
 }
 
+function sendRefreshSignal() {
+    if (!gameRefreshCode) {
+        return;
+    }
+    var key = String.fromCharCode(gameRefreshCode);
+    tty.socket.sendMessage('tty', {"stream": Base64.encode(key)});
+}
+
 function requestTerminal(timeout) {
     /* Run the AJAX request and sleep for 'timeout' if the terminal is not ready */
 
@@ -62,4 +70,8 @@ $(document).ready(function() {
     tty.on('disconnect', function() {
         enablePlayButton();
     });
+
+    tty.on('open window', function() {
+        sendRefreshSignal();
+    })
 });

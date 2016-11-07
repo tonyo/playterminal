@@ -17,6 +17,7 @@
   <script>
     var gamesApiUrl = "{% url 'terminals' %}";
     var gameId = {{ object.id }};
+    var gameRefreshCode = {{ object.refresh_code|default:'""' }};
     var csrfToken = "{{ csrf_token }}";
   </script>
 {% endblock %}
