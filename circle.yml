@@ -4,10 +4,9 @@ machine:
 
 dependencies:
   override:
-    - pip install -r requirements/dev.txt
+    - pip install -r requirements-dev.txt
     - cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py 
 
 test:
   override:
-    - py.test tests/
-#    - flake8 .
+    - make test
