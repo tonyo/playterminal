@@ -19,7 +19,7 @@ def password(request):
 
 @pytest.fixture
 def game(db):
-    return Game.objects.create(step_id=36066, info='yo game',
+    return Game.objects.create(info='yo game',
                                rnr_image_id=9)
 
 

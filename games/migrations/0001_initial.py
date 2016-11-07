@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(serialize=False, verbose_name='ID', primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=50)),
                 ('info', models.TextField()),
-                ('step_id', models.IntegerField()),
+                ('step_id', models.IntegerField(null=True)),
             ],
         ),
     ]
