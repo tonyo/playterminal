@@ -1,5 +1,6 @@
--r base.txt
+-r requirements.txt
 
 pytest==2.9.1
 pytest-django==2.8.0
 pytest-mock==0.11.0
+pip-tools==1.7.0
