@@ -2,6 +2,8 @@ Django>=1.8.16,<1.9
 requests==2.7.0
 gunicorn==19.6.0
 raven==5.31.0
+datadog
+autotask
 
 # Root'n'Roll API client
 #-e git+https://github.com/rootnroll/rootnroll-client.git@0.1.0#egg=rootnroll_client

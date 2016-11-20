@@ -14,7 +14,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 from playterminal.settings.secrets import *
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MAIN_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(MAIN_APP_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,6 +42,7 @@ INSTALLED_APPS = (
 
     # 3rd party
     'raven.contrib.django.raven_compat',
+    'autotask',
 
     # App
     'games',
@@ -86,7 +88,7 @@ WSGI_APPLICATION = 'playterminal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(MAIN_APP_DIR, 'db.sqlite3'),
     }
 }
 
@@ -110,7 +112,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
+STATIC_ROOT = os.path.join(MAIN_APP_DIR, 'collected_static')
 
 RNR_API_URL = 'https://rootnroll.com/api'
 
@@ -119,6 +121,9 @@ SERVERS_NUMBER_HARD_LIMIT = 200
 
 # Sentry client config
 RAVEN_CONFIG = {}
+
+# Autotask settings
+AUTOTASK_IS_ACTIVE = False
 
 # Try to get the secrets values from the environment
 secret_vars = ['SECRET_KEY', 'ROOTNROLL_USERNAME', 'ROOTNROLL_PASSWORD']
