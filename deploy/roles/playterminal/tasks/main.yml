@@ -6,6 +6,7 @@
        accept_hostkey=True
   register: fetch_pt_repo
   become_user: '{{ pt_user }}'
+  when: pt_update_repo
 
 - name: install Python requirements
   pip: requirements="{{ pt_repo_dir }}/requirements.txt"
@@ -13,6 +14,7 @@
        virtualenv_python=python3.4
        extra_args='--exists-action=w --log {{ pt_venv }}/pt_pip.log'
   become_user: '{{ pt_user }}'
+  when: pt_update_repo
 
 - name: Playterminal, installation smoketest
   command: '{{ pt_venv }}/bin/python manage.py'
@@ -31,6 +33,15 @@
   notify:
     - reread supervisor config
   tags: [playterminal.supervisor, playterminal.gunicorn]
+
+- name: copy Nginx config
+  template: src=nginx/playterminal.conf.j2
+            dest=/etc/nginx/conf.d/playterminal.conf
+            owner=root group=root mode=0644
+            backup=yes
+  notify:
+    - reload nginx
+  tags: playterminal.nginx
 
 - name: deploy actions
   include: deploy.yml

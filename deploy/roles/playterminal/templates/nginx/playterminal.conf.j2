@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+##  playtermin.al config  ##
+############################
+
+# Production
+server {
+  server_name playtermin.al;
+
+  listen 443 ssl;
+  ssl_certificate       /etc/letsencrypt/live/playtermin.al/fullchain.pem;
+  ssl_certificate_key   /etc/letsencrypt/live/playtermin.al/privkey.pem;
+
+  keepalive_timeout 70;
+
+  access_log /var/log/nginx/playterminal/access.log;
+  error_log  /var/log/nginx/playterminal/error.log;
+
+  location /static/ {
+    expires 5m;
+    alias {{ pt_repo_dir }}/playterminal/collected_static/;
+  }
+
+  location / {
+    proxy_pass http://127.0.0.1:{{ pt_gunicorn_port }};
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+
+
+# Redirect to HTTPS
+server {
+  server_name playtermin.al;
+  listen 80;
+  rewrite ^ https://$host$request_uri permanent;
+}

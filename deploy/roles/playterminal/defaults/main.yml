@@ -14,3 +14,4 @@ pt_gunicorn_workers: 4
 pt_restart_app: False
 pt_deploy: False
 pt_backup_db: False
+pt_update_repo: True
