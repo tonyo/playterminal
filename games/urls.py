@@ -7,13 +7,12 @@ from games import views
 from games.api import terminals
 
 urlpatterns = [
-    url(r'^$', lambda _: HttpResponseRedirect(reverse('main'))),
+    url(r'^$',
+        flatpages_views.flatpage, {'url': '/main/'}, name='main'),
     url(r'^game/(?P<pk>\d+)/$',
         views.GameDetailView.as_view(), name='game_detail'),
     url(r'^games/$',
         views.GameListView.as_view(), name='game_list'),
-    url(r'^main/$',
-        flatpages_views.flatpage, {'url': '/main/'}, name='main'),
     url(r'^about/$',
         flatpages_views.flatpage, {'url': '/about/'}, name='about'),
 
