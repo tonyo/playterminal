@@ -1,0 +1,21 @@
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/app/playterminal/collected_static/
+
+  python-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8010"
+    volumes:
+      - static_volume:/app/playterminal/collected_static/
+    environment:
+      - SECRET_KEY=default
+
+volumes:
+  static_volume:
