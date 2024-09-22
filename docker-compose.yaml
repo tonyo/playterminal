@@ -2,9 +2,23 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - "80:80"
+      - "8082:80"
     volumes:
-      - static_volume:/app/playterminal/collected_static/
+      - static-volume:/app/playterminal/collected_static/
+    restart: always
+    labels:
+      - traefik.enable=true
+      - "traefik.http.middlewares.playterminal-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.playterminal-redirect.redirectscheme.permanent=true"
+      # HTTP
+      - "traefik.http.routers.playterminal-nginx.rule=Host(`playtermin.al`)"
+      - "traefik.http.routers.playterminal-nginx.entrypoints=http"
+      - "traefik.http.routers.playterminal-nginx.middlewares=playterminal-redirect"
+      # HTTPS
+      - "traefik.http.routers.playterminal-nginx-secure.rule=Host(`playtermin.al`)"
+      - "traefik.http.routers.playterminal-nginx-secure.entryPoints=https"
+      - "traefik.http.routers.playterminal-nginx-secure.tls=true"
+      - "traefik.http.routers.playterminal-nginx-secure.tls.certresolver=letsencrypt"
 
   python-server:
     build:
@@ -13,9 +27,12 @@ services:
     ports:
       - "8010:8010"
     volumes:
-      - static_volume:/app/playterminal/collected_static/
-    environment:
-      - SECRET_KEY=default
+      - static-volume:/app/playterminal/collected_static/
+      - db-data:/app/data
+    env_file:
+      - .env.local
+    restart: always
 
 volumes:
-  static_volume:
+  static-volume:
+  db-data:

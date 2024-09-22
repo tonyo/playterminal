@@ -12,3 +12,5 @@ local.py
 # Archives
 *.gz
 *.zip
+
+.env.local
