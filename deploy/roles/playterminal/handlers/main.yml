@@ -1,3 +1,0 @@
----
-- name: reload nginx
-  shell: nginx -t && service nginx reload

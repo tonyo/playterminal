@@ -31,4 +31,4 @@ Dependencies: Python 3
 
   `./manage.py loaddata seed`
 
-TODO: Ansible docs
+TODO: docker-compose docs

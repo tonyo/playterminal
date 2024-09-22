@@ -1,6 +1,0 @@
----  
-- name: remove persistent iptables rules
-  file: name="/etc/iptables/{{ item }}" state=absent
-  with_items:
-    - rules.v4
-    - rules.v6
