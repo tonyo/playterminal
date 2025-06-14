@@ -1,6 +1,9 @@
 services:
-  nginx:
+  nginx-playterminal:
+    image: tonyo/playterminal-nginx
     build: ./nginx
+    x-ports:
+      - playtermin.al:80/https
     ports:
       - "8082:80"
     volumes:
@@ -8,6 +11,7 @@ services:
     restart: always
 
   python-server:
+    image: tonyo/playterminal-server
     build:
       context: .
       dockerfile: Dockerfile
