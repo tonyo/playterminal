@@ -1,5 +1,5 @@
 services:
-  nginx-playterminal:
+  playterminal-nginx:
     image: tonyo/playterminal-nginx
     build: ./nginx
     x-ports:
@@ -10,7 +10,7 @@ services:
       - static-volume:/app/playterminal/collected_static/
     restart: always
 
-  python-server:
+  playterminal-server:
     image: tonyo/playterminal-server
     build:
       context: .
