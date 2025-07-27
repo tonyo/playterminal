@@ -1,6 +1,7 @@
 services:
   playterminal-nginx:
     image: tonyo/playterminal-nginx
+    pull_policy: always
     build: ./nginx
     x-ports:
       - playtermin.al:80/https
@@ -12,6 +13,7 @@ services:
 
   playterminal-server:
     image: tonyo/playterminal-server
+    pull_policy: always
     build:
       context: .
       dockerfile: Dockerfile
