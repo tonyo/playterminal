@@ -5,8 +5,6 @@ services:
     build: ./nginx
     x-ports:
       - playtermin.al:80/https
-    ports:
-      - "8082:80"
     volumes:
       - static-volume:/app/playterminal/collected_static/
     restart: always
@@ -17,8 +15,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8010:8010"
     volumes:
       - static-volume:/app/playterminal/collected_static/
       - db-data:/app/data
