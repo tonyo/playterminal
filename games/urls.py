@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect
 from django.contrib.flatpages import views as flatpages_views
 
 from games import views
-from games.api import terminals
 
 urlpatterns = [
     url(r'^$',
@@ -15,8 +14,4 @@ urlpatterns = [
         views.GameListView.as_view(), name='game_list'),
     url(r'^about/$',
         flatpages_views.flatpage, {'url': '/about/'}, name='about'),
-
-    # API
-    url(r'^api/terminals/$',
-        terminals, name='terminals'),
 ]

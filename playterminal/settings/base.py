@@ -114,11 +114,6 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(MAIN_APP_DIR, 'collected_static')
 
-RNR_API_URL = 'https://rootnroll.com/api'
-
-# Maximum number of running servers allowed
-SERVERS_NUMBER_HARD_LIMIT = 200
-
 # Sentry client config
 RAVEN_CONFIG = {}
 
@@ -126,7 +121,7 @@ RAVEN_CONFIG = {}
 AUTOTASK_IS_ACTIVE = False
 
 # Try to get the secrets values from the environment
-secret_vars = ['SECRET_KEY', 'ROOTNROLL_USERNAME', 'ROOTNROLL_PASSWORD']
+secret_vars = ['SECRET_KEY']
 for var in secret_vars:
     value = os.getenv(var)
     if value:

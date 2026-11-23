@@ -19,7 +19,7 @@ Dependencies: Python 3
 
   `cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py`
 
-3. Update SECRET_KEY, ROOTNROLL_USERNAME, etc.
+3. Set SECRET_KEY
 
   `vim playterminal/settings/secrets.py` 
 

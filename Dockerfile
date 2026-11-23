@@ -1,11 +1,5 @@
 FROM python:3.6-slim
 
-# install git, remove apt cache
-RUN apt-get update \
-    && apt-get install -y git --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
 COPY requirements.txt .
