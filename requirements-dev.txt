@@ -1,6 +1,8 @@
 -r requirements.txt
 
-pytest==2.9.1
-pytest-django==2.8.0
-pytest-mock==0.11.0
-pip-tools==1.7.0
+pytest==9.2.0
+pytest-django==4.14.0
+iniconfig==2.3.1  # via pytest
+packaging==26.3  # via pytest
+pluggy==1.7.0  # via pytest
+pygments==2.21.0  # via pytest

@@ -4,3 +4,7 @@ Dockerfile
 .dockerignore
 nginx
 
+.env.local
+__pycache__
+*.pyc
+.pytest_cache

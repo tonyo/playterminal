@@ -6,4 +6,4 @@ clean:
 	find . -name \*.pyo -delete
 
 test:
-	py.test tests/
+	pytest tests/
