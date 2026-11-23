@@ -40,10 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.flatpages',
 
-    # 3rd party
-    'raven.contrib.django.raven_compat',
-    'autotask',
-
     # App
     'games',
 )
@@ -113,12 +109,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(MAIN_APP_DIR, 'collected_static')
-
-# Sentry client config
-RAVEN_CONFIG = {}
-
-# Autotask settings
-AUTOTASK_IS_ACTIVE = False
 
 # Try to get the secrets values from the environment
 secret_vars = ['SECRET_KEY']
