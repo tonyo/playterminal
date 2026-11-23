@@ -5,7 +5,11 @@ from django.db import models
 class Game(models.Model):
     name = models.CharField(max_length=50)
     info = models.TextField()
-    rnr_image_id = models.IntegerField(null=True)
+    command = models.CharField(
+        max_length=100, blank=True,
+        help_text="The shell command that starts the Game inside the VM "
+                  "Image, such as robots. Blank for Games not on v86 yet."
+    )
     displayed = models.BooleanField(default=False)
     refresh_code = models.IntegerField(
         null=True, blank=True,

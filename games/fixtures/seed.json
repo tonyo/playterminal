@@ -43,7 +43,7 @@
     "fields": {
       "name": "Robots",
       "info": "Robots is a classic game from the BSD games collection.\n\nYou are surrounded by robots that chase you around the board. Make them crash into each other and into the junk heaps they leave behind. Teleport when cornered.\n\nMove with h, j, k, l, y, u, b, n. Press t to teleport, w to wait for the robots.",
-      "rnr_image_id": null,
+      "command": "robots",
       "displayed": true,
       "refresh_code": null
     }
@@ -54,7 +54,7 @@
     "fields": {
       "name": "Tetris",
       "info": "The BSD version of Tetris.",
-      "rnr_image_id": null,
+      "command": "tetris-bsd",
       "displayed": false,
       "refresh_code": null
     }
@@ -65,7 +65,7 @@
     "fields": {
       "name": "Greed",
       "info": "Eat as many numbers as you can without running into the edges or into eaten squares.",
-      "rnr_image_id": null,
+      "command": "greed",
       "displayed": false,
       "refresh_code": null
     }
@@ -76,7 +76,7 @@
     "fields": {
       "name": "Hangman",
       "info": "Guess the word, one letter at a time, before the man is hanged.",
-      "rnr_image_id": null,
+      "command": "hangman",
       "displayed": false,
       "refresh_code": null
     }
@@ -87,7 +87,7 @@
     "fields": {
       "name": "NetHack",
       "info": "Explore the Dungeons of Doom and retrieve the Amulet of Yendor.",
-      "rnr_image_id": null,
+      "command": "nethack",
       "displayed": false,
       "refresh_code": null
     }
