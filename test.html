@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>v86 Snapshot test</title>
+<!-- Minimal check page: `mise run serve`, open http://localhost:8087/test.html.
+     Restores out/state.bin.zst headless and shows raw serial0 (ttyS0) output.
+     ?cmd=... sends a line once the emulator is ready (default: echo hi). -->
+<style>
+  body { background: #111; color: #ddd; font: 14px system-ui, sans-serif; margin: 1rem; }
+  pre { font: 14px monospace; white-space: pre-wrap; }
+</style>
+<div id="status">Loading…</div>
+<pre id="serial"></pre>
+<script src="out/libv86.js"></script>
+<script type="module">
+import { v86Options, snapshotUrl } from "./out/config.mjs";
+
+const status = document.getElementById("status");
+const pre = document.getElementById("serial");
+const t0 = performance.now();
+const elapsed = () => ((performance.now() - t0) / 1000).toFixed(2) + " s";
+
+const emulator = new V86({
+    ...v86Options("./out/"),
+    initial_state: { url: snapshotUrl("./out/") },
+    disable_keyboard: true,
+    disable_mouse: true,
+});
+window.emulator = emulator;
+window.serialText = "";
+emulator.add_listener("serial0-output-byte", (b) => {
+    const c = String.fromCharCode(b);
+    window.serialText += c;
+    pre.textContent += c;
+});
+emulator.add_listener("emulator-ready", () => {
+    status.textContent = `Snapshot restored at ${elapsed()}`;
+    const cmd = new URLSearchParams(location.search).get("cmd") ?? "echo hi";
+    setTimeout(() => emulator.serial0_send(cmd + "\n"), 200);
+});
+</script>
