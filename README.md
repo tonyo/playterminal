@@ -9,26 +9,36 @@ Repository with games (Docker images): https://github.com/rev112/playterminal-im
 
 ### Getting started
 
-Dependencies: Python 3
+Dependencies: Docker (the app runs on Python 3.14 and Django 5.2 LTS).
 
-1. Create a virtual environment and install dependencies
+1. Create `.env.local` (gitignored):
 
-  `pip install -r requirements.txt`
+   ```
+   SECRET_KEY=<a long random string>
+   CSRF_TRUSTED_ORIGINS=http://localhost:8090
+   ```
 
-2. Create the `secrets.py` file with sensitive information:
+   `CSRF_TRUSTED_ORIGINS` is only needed when the site is served on a
+   non-default port, as in the local run below.
 
-  `cp playterminal/settings/secrets.dist.py playterminal/settings/secrets.py`
+2. Build and start it. Without a local compose override that publishes the
+   nginx port, add one (for example `ports: ["8090:80"]` on
+   `playterminal-nginx`, and `pull_policy: build` on both services).
 
-3. Set SECRET_KEY
+   ```
+   docker compose up -d --build
+   docker compose exec playterminal-server sh -c \
+     "python manage.py migrate && python manage.py loaddata seed && python manage.py collectstatic --noinput"
+   docker compose exec playterminal-server python manage.py createsuperuser
+   ```
 
-  `vim playterminal/settings/secrets.py` 
+3. Run the tests inside the image (nothing is bind-mounted, so no root-owned
+   files end up in the working tree):
 
-4. Run migrations
+   ```
+   docker run --rm -e SECRET_KEY=test --entrypoint sh <server image> \
+     -c "pip install -q -r requirements-dev.txt && pytest tests/ -p no:cacheprovider"
+   ```
 
-  `./manage.py migrate`
-
-5. Load initial data
-
-  `./manage.py loaddata seed`
-
-TODO: docker-compose docs
+Requirements are exact pins maintained by hand in `requirements.txt` and
+`requirements-dev.txt` (no pip-compile).
