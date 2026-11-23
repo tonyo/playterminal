@@ -1,5 +1,5 @@
 {
-  "name": "docker-in-browser",
+  "name": "playterminal-v86-image",
   "private": true,
   "type": "module",
   "dependencies": {
