@@ -117,6 +117,15 @@ for var in secret_vars:
     if value:
         globals()[var] = value
 
+# Since Django 4.0 the CSRF check compares the Origin header with the host.
+# nginx forwards Host without the port, so a local run on a non-default port
+# (e.g. http://localhost:8090) must be listed here: comma-separated, with scheme.
+CSRF_TRUSTED_ORIGINS = ['https://playtermin.al'] + [
+    origin.strip()
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+
 try:
     from .local import *
     print('Loaded local settings')
