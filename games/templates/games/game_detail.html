@@ -14,9 +14,11 @@
   <div id="status-message" class="alert alert-danger" role="alert" hidden>
   </div>
 
+  {{ game_config|json_script:"game-config" }}
   <script>
-    var gameId = {{ object.id }};
-    var gameRefreshCode = {{ object.refresh_code|default:'""' }};
-    var csrfToken = "{{ csrf_token }}";
+    var gameConfig = JSON.parse(
+      document.getElementById('game-config').textContent);
+    var gameId = gameConfig.id;
+    var gameRefreshCode = gameConfig.refreshCode;
   </script>
 {% endblock %}

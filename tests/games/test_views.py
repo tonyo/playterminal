@@ -24,6 +24,31 @@ def test_game_detail_has_play_button(game, client):
     assert 'id="open-terminal-btn"' in response.content.decode()
 
 
+def test_game_detail_renders_command_into_js_config(game, client):
+    game.command = 'robots'
+    game.refresh_code = 12
+    game.save()
+
+    response = client.get(game.get_absolute_url())
+
+    assert response.context['game_config'] == {
+        'id': game.id, 'command': 'robots', 'refreshCode': 12,
+    }
+    assert ('<script id="game-config" type="application/json">'
+            f'{{"id": {game.id}, "command": "robots", "refreshCode": 12}}'
+            '</script>') in response.content.decode()
+
+
+def test_game_detail_escapes_command_in_js_config(game, client):
+    game.command = '</script><script>alert(1)'
+    game.save()
+
+    content = client.get(game.get_absolute_url()).content.decode()
+
+    assert '</script><script>alert(1)' not in content
+    assert '\\u003C/script\\u003E' in content
+
+
 @pytest.mark.parametrize('name, url', [('main', '/main/'), ('about', '/about/')])
 def test_flatpages_render(name, url, client, db):
     page = FlatPage.objects.create(url=url, title=name, content=f'{name} text')

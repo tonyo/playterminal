@@ -6,6 +6,15 @@ from games.models import Game
 class GameDetailView(DetailView):
     model = Game
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['game_config'] = {
+            'id': self.object.id,
+            'command': self.object.command,
+            'refreshCode': self.object.refresh_code,
+        }
+        return context
+
 
 class GameListView(ListView):
     model = Game
