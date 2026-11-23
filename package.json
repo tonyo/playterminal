@@ -1,0 +1,8 @@
+{
+  "name": "docker-in-browser",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "v86": "0.5.473"
+  }
+}
