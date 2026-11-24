@@ -86,9 +86,9 @@
     "pk": 5,
     "fields": {
       "name": "NetHack",
-      "info": "Explore the Dungeons of Doom and retrieve the Amulet of Yendor.",
+      "info": "NetHack is the classic roguelike, first released in 1987.\n\nExplore the Dungeons of Doom, fight its monsters, and retrieve the Amulet of Yendor. Every game is a new dungeon, and a death is final.\n\nMove with h, j, k, l, y, u, b, n. Press ? for help and the full list of commands, and Ctrl-C to quit.",
       "command": "nethack",
-      "displayed": false,
+      "displayed": true,
       "refresh_code": null
     }
   }

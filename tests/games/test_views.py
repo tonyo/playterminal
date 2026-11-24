@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
+from django.core.management import call_command
 from django.urls import reverse
 
 from games.models import Game
@@ -15,6 +16,15 @@ def test_game_list_shows_only_displayed_games(game, client):
     content = response.content.decode()
     assert "Robots" in content
     assert "Tetris" not in content
+
+
+def test_seed_lists_the_games_on_v86(client, db):
+    call_command("loaddata", "seed", verbosity=0)
+
+    response = client.get(reverse("game_list"))
+
+    shown = [game.name for game in response.context["object_list"]]
+    assert sorted(shown) == ["NetHack", "Robots"]
 
 
 def test_game_detail_has_play_button(game, client):
