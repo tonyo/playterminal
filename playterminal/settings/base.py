@@ -137,7 +137,7 @@ CSRF_TRUSTED_ORIGINS = ['https://playtermin.al'] + [
 ]
 
 try:
-    from .local import *
+    from .local import *  # noqa: F403
     print('Loaded local settings')
 except ImportError:
     print('Skipping local settings')

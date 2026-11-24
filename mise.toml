@@ -7,10 +7,26 @@ lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64"]
 [tools]
 python = "3.14.10"
 uv = "0.13"
+# Runs the git hooks in .pre-commit-config.yaml.
+pre-commit = "4.7.0"
 
 [env]
 _.python.venv = { path = ".venv", create = true }
 COMPOSE_FILE = "docker-compose.yaml:compose.local.yaml"
+
+[tasks.setup]
+description = "Install the locked dependencies and the git pre-commit hooks"
+depends = ["sync"]
+run = "pre-commit install"
+
+[tasks.lint]
+description = "Run the pre-commit hooks (ruff, YAML/JSON/TOML checks, whitespace) on every file"
+run = "pre-commit run --all-files"
+
+[tasks.format]
+description = "Format and fix the Python code with ruff"
+depends = ["sync"]
+run = ["ruff check --fix .", "ruff format ."]
 
 [tasks.sync]
 description = "Install the locked dependencies into .venv"
