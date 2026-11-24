@@ -1,5 +1,5 @@
 /**
- * Terminal
+ * Terminal Window (games/js/terminal-window.js)
  */
 
 .window {
@@ -14,11 +14,6 @@
   box-shadow: rgba(0, 0, 0, 0.8) 2px 2px 20px;
 }
 
-.maximized .window {
-  border: none;
-  box-shadow: none;
-}
-
 .window .bar {
   position: absolute;
   top: 0;
@@ -28,10 +23,7 @@
   padding: 4px 0;
   font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
   color: #fafafa;
-}
-
-.dark .bar,
-.maximized .bar {
+  cursor: move;
 }
 
 .window .bar .title {
@@ -39,43 +31,20 @@
   right: 5px;
   top: 2px;
   font-size: 14px;
-  cursor: default;
 }
 
-.tab {
+.window .bar .tab {
   font-size: 14px;
   margin-left: 6px;
   float: left;
   cursor: pointer;
 }
 
-.tab:hover {
+.window .bar .tab:hover {
   font-weight: bold;
 }
 
-.grip {
-  position: absolute;
-  bottom: -10px;
-  right: -10px;
-  width: 22px;
-  height: 22px;
-  cursor: se-resize;
-  z-index: -1;
-  background: transparent;
-}
-
-.grip:hover {
-}
-
-.terminal {
+.window .screen {
   border: #000 solid 5px;
-  font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
-  font-size: 14px;
-  color: #f0f0f0;
   background: #000;
-}
-
-.reverse-video {
-  color: #000;
-  background: #f0f0f0;
 }
