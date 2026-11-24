@@ -1,0 +1,21 @@
+[project]
+name = "playterminal"
+version = "0.0.0"
+description = "Play terminal-based games right in your browser."
+requires-python = "==3.14.*"
+dependencies = [
+    "django>=5.2.19,<5.3",  # 5.2 LTS
+    "gunicorn>=27.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+]
+
+[tool.uv]
+# An application, not a library: install the dependencies only.
+package = false
+# Only lock releases that are at least 7 days old.
+exclude-newer = "7 days"

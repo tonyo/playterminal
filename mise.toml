@@ -1,0 +1,44 @@
+[settings]
+minimum_release_age = "7d"
+lockfile = true
+lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64"]
+
+# mise installs Python and uv; uv manages .venv from pyproject.toml and uv.lock.
+[tools]
+python = "3.14.10"
+uv = "0.13"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+COMPOSE_FILE = "docker-compose.yaml:compose.local.yaml"
+
+[tasks.sync]
+description = "Install the locked dependencies into .venv"
+run = "uv sync --locked"
+
+[tasks.test]
+description = "Run the tests"
+depends = ["sync"]
+env = { SECRET_KEY = "test" }
+run = "pytest tests/ -p no:cacheprovider"
+
+[tasks.up]
+description = "Build and start the local stack on http://localhost:8090, then migrate and collect static files"
+run = """
+set -eu
+docker compose up -d --build
+docker compose exec -T playterminal-server sh -c \
+  "python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear"
+"""
+
+[tasks.seed]
+description = "Load the seed Games into the local stack"
+run = "docker compose exec -T playterminal-server python manage.py loaddata seed"
+
+[tasks.down]
+description = "Stop the local stack"
+run = "docker compose down"
+
+[tasks.clean]
+description = "Delete compiled Python files"
+run = "find . -path ./.venv -prune -o \\( -name '*.pyc' -o -name '*.pyo' \\) -print -delete"
