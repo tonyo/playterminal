@@ -42,7 +42,7 @@ def main(tar_path, v86_license_path, out_path):
         "These files are served from this directory. Each program keeps its own license;",
         "running it in the emulator does not change the license of anything else.",
         "",
-        "The image is built by https://github.com/tonyo/playterminal-images (v86/).",
+        "The image is built by https://github.com/tonyo/playterminal (vm/).",
         "",
         "",
         "1. v86 emulator (libv86.js, v86.wasm)",
@@ -86,7 +86,7 @@ def main(tar_path, v86_license_path, out_path):
         "----------------------------------------",
         "",
         "/usr/local/bin/playterminal-launcher and the image build scripts:",
-        "MIT, https://github.com/tonyo/playterminal-images",
+        "MIT, https://github.com/tonyo/playterminal/tree/master/vm",
         "",
     ]
     with open(out_path, "w") as f:

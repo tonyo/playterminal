@@ -4,7 +4,8 @@ PlayTerminal is an attempt to bring old-school console gaming back to life. The 
 
 Deployed instance: https://playtermin.al
 
-Repository with games (Docker images): https://github.com/rev112/playterminal-images
+Games run in the visitor's browser, in the [v86](https://github.com/copy/v86) emulator
+on an Alpine Linux VM Image built in [`vm/`](vm/README.md).
 
 
 ### Getting started
@@ -29,11 +30,10 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
    `CSRF_TRUSTED_ORIGINS` is only needed when the site is served on a
    non-default port, as in the local run below.
 
-3. Build the VM Image and Snapshot in
-   [playterminal-images](https://github.com/rev112/playterminal-images)
-   (`v86/`, `mise run build`). `compose.local.yaml` mounts its `v86/out/`
-   into nginx at `/v86/`; it expects the checkout next to this one, or set
-   `V86_OUT` to the output directory.
+3. Build the VM Image and Snapshot: `cd vm && mise run build` (needs Node
+   and Docker; see [vm/README.md](vm/README.md)). `compose.local.yaml`
+   mounts `vm/out/` into nginx at `/v86/`; set `V86_OUT` to serve another
+   output directory.
 
 4. Build and start it on http://localhost:8090. `mise run up` builds the
    images, starts the stack, migrates and collects static files. Run it again

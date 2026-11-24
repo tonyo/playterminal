@@ -1,0 +1,33 @@
+name: VM Image
+
+# Builds the VM Image and Snapshot from vm/ and verifies them (boot, shell, robots),
+# only when vm/ changes: the build takes a few minutes.
+on:
+  push:
+    branches: [master]
+    paths: ["vm/**", ".github/workflows/vm.yml"]
+  pull_request:
+    branches: [master]
+    paths: ["vm/**", ".github/workflows/vm.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
+        with:
+          working_directory: vm
+      - name: Build and verify (mise run build)
+        working-directory: vm
+        run: mise run build
+      # The deployable output: serve it at V86_BASE_URL (/v86/ by default).
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vm-out
+          path: vm/out/
+          retention-days: 14

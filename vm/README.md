@@ -5,6 +5,9 @@ Builds the files PlayTerminal needs to run Games in the visitor's browser with t
 Games, and a Snapshot of it booted to a root shell on the serial console (ttyS0). The page
 restores the Snapshot and drives the Game over v86's `serial0`.
 
+This directory came from the playterminal-images repo and is under its MIT license
+([LICENSE](LICENSE)); the rest of PlayTerminal is Apache-2.0.
+
 ## Build
 
 Needs [mise](https://mise.jdx.dev) and Docker (the image is built with
@@ -15,6 +18,9 @@ mise run build     # clean build of out/, then `mise run verify`
 mise run verify    # restore the Snapshot in node; check `echo hi` and `robots` over serial0
 mise run serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
+
+CI (`.github/workflows/vm.yml`) runs `mise run build` whenever `vm/` changes and keeps
+`out/` as the `vm-out` artifact for 14 days.
 
 ## Output (`out/`)
 
