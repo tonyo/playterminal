@@ -26,7 +26,13 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'playtermin.al', 'pt']
+# Extra hosts (comma-separated) come from the environment, e.g. a LAN IP for a
+# local run reached from another machine.
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'playtermin.al', 'pt'] + [
+    host.strip()
+    for host in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if host.strip()
+]
 
 
 # Application definition
