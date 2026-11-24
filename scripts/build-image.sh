@@ -38,6 +38,7 @@ if missing:
     sys.exit(f"fs.json is missing {len(missing)} of {len(names)} tar entries: {missing[:10]}")
 print(f"fs.json has all {len(names)} tar entries")
 EOF
+python3 -I scripts/third-party.py "$TAR" node_modules/v86/LICENSE "$OUT"/THIRD-PARTY.txt
 mkdir -p "$FLAT"
 "${UVRUN[@]}" "$TOOLS"/copy-to-sha256.py --zstd "$TAR" "$FLAT"
 rm "$TAR"

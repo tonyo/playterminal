@@ -24,6 +24,7 @@ mise run serve     # then open http://localhost:8087/test.html (raw serial0 outp
 | `seabios.bin`, `vgabios.bin` | BIOS files |
 | `fs.json`, `rootfs-flat/` | the VM Image as v86 9p-over-HTTP (index + sha256-named zstd blobs, fetched on demand) |
 | `state.bin.zst` | the Snapshot |
+| `THIRD-PARTY.txt` | licenses and source pointers for the emulator, BIOS files and every Alpine package in the VM Image (`scripts/third-party.py`, from the image's apk database) |
 | `config.mjs` | `v86Options(base)` and `snapshotUrl(base)`; the page must use these exact options or the Snapshot won't restore |
 
 Serve `out/` as static files and, in the page:
