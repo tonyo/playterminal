@@ -6,6 +6,19 @@ function disablePlayButton() {
     $("#open-terminal-btn").prop('disabled', true);
 }
 
+function showStatus(text, kind) {
+    $('#status-message')
+        .removeClass('alert-info alert-danger')
+        .addClass('alert-' + kind)
+        .text(text)
+        .show();
+}
+
+function hideStatus() {
+    $('#status-message').hide();
+    $("body").css("cursor", "default");
+}
+
 function sendRefreshSignal() {
     if (!gameRefreshCode) {
         return;
@@ -14,12 +27,39 @@ function sendRefreshSignal() {
     tty.socket.sendMessage('tty', {"stream": Base64.encode(key)});
 }
 
-$(document).ready(function() {
-    $("#open-terminal-btn").click(function() {
-        // The Terminal Window is not wired to a backend yet: the v86
-        // serial socket replaces the rootnroll terminal in a later step.
-        $('#status-message').hide();
+function showProgress(e) {
+    if (!e.lengthComputable || !e.total) {
+        return;
+    }
+    var percent = Math.floor(100 * e.loaded / e.total);
+    showStatus('Loading the game… ' + percent + '%', 'info');
+}
+
+function openTerminal() {
+    disablePlayButton();
+    $("body").css("cursor", "progress");
+    showStatus('Loading the game…', 'info');
+    tty.open(function() {
+        return new V86Socket({
+            base: gameConfig.v86Base,
+            command: gameConfig.command,
+            onProgress: showProgress
+        });
+    }, gameConfig.command);
+
+    // tty.open() drops earlier 'attach' listeners, so add this one after it.
+    tty.once('attach', function(msg) {
+        if (msg.status == 200) {
+            hideStatus();
+        } else {
+            showStatus('Something went wrong. Try again in a few minutes.', 'danger');
+            $("body").css("cursor", "default");
+        }
     });
+}
+
+$(document).ready(function() {
+    $("#open-terminal-btn").click(openTerminal);
 
     tty.on('disconnect', function() {
         enablePlayButton();
@@ -27,5 +67,5 @@ $(document).ready(function() {
 
     tty.on('open window', function() {
         sendRefreshSignal();
-    })
+    });
 });

@@ -21,18 +21,26 @@ Dependencies: Docker (the app runs on Python 3.14 and Django 5.2 LTS).
    `CSRF_TRUSTED_ORIGINS` is only needed when the site is served on a
    non-default port, as in the local run below.
 
-2. Build and start it. Without a local compose override that publishes the
-   nginx port, add one (for example `ports: ["8090:80"]` on
-   `playterminal-nginx`, and `pull_policy: build` on both services).
+2. Build the VM Image and Snapshot in
+   [playterminal-images](https://github.com/rev112/playterminal-images)
+   (`v86/`, `mise run build`). `compose.local.yaml` mounts its `v86/out/`
+   into nginx at `/v86/`; it expects the checkout next to this one, or set
+   `V86_OUT` to the output directory.
+
+3. Build and start it on http://localhost:8090:
 
    ```
+   export COMPOSE_FILE=docker-compose.yaml:compose.local.yaml
    docker compose up -d --build
    docker compose exec playterminal-server sh -c \
      "python manage.py migrate && python manage.py loaddata seed && python manage.py collectstatic --noinput"
    docker compose exec playterminal-server python manage.py createsuperuser
    ```
 
-3. Run the tests inside the image (nothing is bind-mounted, so no root-owned
+   Play runs the Game's Command in v86 inside the browser: nothing runs on
+   the server.
+
+4. Run the tests inside the image (nothing is bind-mounted, so no root-owned
    files end up in the working tree):
 
    ```

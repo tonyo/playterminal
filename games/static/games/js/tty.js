@@ -52,9 +52,10 @@ tty.elements;
  * Open
  */
 
-tty.open = function(kayleeUrl, terminalId) {
-  // TODO: set up reconnecton delay
-  tty.kayleeUrl = kayleeUrl;
+// createSocket() returns an object with the SockJS socket's shape:
+// send(string), close(), and onopen/onmessage/onclose handlers.
+tty.open = function(createSocket, terminalId) {
+  tty.createSocket = createSocket;
   tty.terminalId = terminalId;
 
   tty.windows = [];
@@ -103,7 +104,7 @@ tty.open = function(kayleeUrl, terminalId) {
     var win = new Window
       , tab = win.tabs[0];
     tab.id = tty.terminalId;
-    tab.setProcessName("Terminal ID: " + tab.id.slice(0, 5));
+    tab.setProcessName(tab.id);
     tty.terms[tty.terminalId] = tab;
     win.each(function(term) {
       term.resize(win.cols, win.rows);
@@ -141,7 +142,7 @@ tty.open = function(kayleeUrl, terminalId) {
  */
 
 tty.connect = function() {
-  tty.socket = new SockJS(tty.kayleeUrl);
+  tty.socket = tty.createSocket();
 
   tty.socket.onopen = function() {
     tty.reset();

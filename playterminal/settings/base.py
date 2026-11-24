@@ -110,6 +110,10 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(MAIN_APP_DIR, 'collected_static')
 
+# URL prefix (ending in '/') of the VM Image and Snapshot files built by
+# playterminal-images/v86 (`mise run build` -> v86/out/). nginx serves them.
+V86_BASE_URL = os.getenv('V86_BASE_URL', '/v86/')
+
 # Try to get the secrets values from the environment
 secret_vars = ['SECRET_KEY']
 for var in secret_vars:

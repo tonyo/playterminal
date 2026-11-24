@@ -101,7 +101,7 @@ EventEmitter.prototype.emit = function(type) {
   if (!this._events[type]) return;
 
   var args = Array.prototype.slice.call(arguments, 1)
-    , obj = this._events[type]
+    , obj = this._events[type].slice() // once() listeners remove themselves
     , l = obj.length
     , i = 0;
 

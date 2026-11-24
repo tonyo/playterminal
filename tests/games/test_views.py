@@ -24,7 +24,8 @@ def test_game_detail_has_play_button(game, client):
     assert 'id="open-terminal-btn"' in response.content.decode()
 
 
-def test_game_detail_renders_command_into_js_config(game, client):
+def test_game_detail_renders_command_into_js_config(game, client, settings):
+    settings.V86_BASE_URL = '/vm/'
     game.command = 'robots'
     game.refresh_code = 12
     game.save()
@@ -33,10 +34,11 @@ def test_game_detail_renders_command_into_js_config(game, client):
 
     assert response.context['game_config'] == {
         'id': game.id, 'command': 'robots', 'refreshCode': 12,
+        'v86Base': '/vm/',
     }
     assert ('<script id="game-config" type="application/json">'
-            f'{{"id": {game.id}, "command": "robots", "refreshCode": 12}}'
-            '</script>') in response.content.decode()
+            f'{{"id": {game.id}, "command": "robots", "refreshCode": 12, '
+            '"v86Base": "/vm/"}</script>') in response.content.decode()
 
 
 def test_game_detail_escapes_command_in_js_config(game, client):
