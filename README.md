@@ -16,7 +16,8 @@ mise installs Python and [uv](https://docs.astral.sh/uv/) (`mise.toml`,
 locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
 (`pyproject.toml`, locked in `uv.lock`). `mise tasks` lists the tasks.
 
-1. Run `mise install`.
+1. Run `mise install && mise run setup`: it installs the tools, the
+   dependencies and the git pre-commit hooks (ruff and file checks).
 
 2. Create `.env.local` (gitignored):
 
@@ -51,7 +52,8 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
    Play runs the Game's Command in v86 inside the browser: nothing runs on
    the server.
 
-5. Run the tests: `mise run test`.
+5. Run the tests: `mise run test`. Run every pre-commit hook on all files:
+   `mise run lint`; format the Python code: `mise run format`.
 
 Dependency updates: change `pyproject.toml` if needed, then run `uv lock`
 (or `uv lock --upgrade`). Both uv (`exclude-newer`) and mise
