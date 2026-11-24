@@ -10,8 +10,10 @@
  *   tty    -> keystrokes go to serial0
  *   serial0 output -> {msg: 'tty', stream: <base64>}
  *
- * When the Command exits and the shell prompt comes back, the socket closes,
- * which closes the Terminal Window. close() destroys the emulator.
+ * The Snapshot sits at the guest's launcher on ttyS0, which reads one line,
+ * "<rows> <cols> <command>", runs the Command, and prints END when it exits
+ * (playterminal-images v86/image/playterminal-launcher). END closes the
+ * socket, which closes the Terminal Window. close() destroys the emulator.
  *
  * Each emulator runs in its own hidden iframe, removed on close. With several
  * V86 instances created one after another in one page (v86 0.5.473), each
@@ -40,9 +42,18 @@ function createFrame(base) {
   });
 }
 
-// The shell prompt on ttyS0, as saved in the Snapshot. busybox ash follows
-// it with a cursor position query.
-var PROMPT_RE = /localhost:~# (\x1b\[6n)?$/;
+// Printed by the launcher when the Command exits. An OSC sequence, so it would
+// not show in a terminal anyway; it is cut from the output.
+var END = '\x1b]777;playterminal;exit\x07';
+
+// Length of the longest tail of `s` that is a start of END: output that might
+// be the first bytes of END is held back until the next bytes show whether it is.
+function endPrefixLength(s) {
+  for (var n = Math.min(s.length, END.length - 1); n > 0; n--) {
+    if (s.slice(-n) === END.slice(0, n)) return n;
+  }
+  return 0;
+}
 
 function V86Socket(options) {
   this.base = options.base;           // URL prefix of the VM files, ends in '/'
@@ -53,7 +64,6 @@ function V86Socket(options) {
   this.emulator = null;
   this.closed = false;
   this.launched = false;
-  this.recent = '';                   // tail of the output since launch
   this.pending = '';                  // output not yet sent to the terminal
   this.flushScheduled = false;
 
@@ -132,16 +142,14 @@ V86Socket.prototype.attach = function() {
 V86Socket.prototype.launch = function(rows, cols) {
   this.launched = true;
   this.emulator.serial0_send(
-    'stty rows ' + (rows | 0) + ' cols ' + (cols | 0) +
-    '; clear; exec ' + this.command + '\n');
+    (rows | 0) + ' ' + (cols | 0) + ' ' + this.command + '\n');
 };
 
 V86Socket.prototype.output = function(chr) {
-  // Before launch, the serial port only carries what the Snapshot left behind.
+  // Nothing is expected on the serial port before launch.
   if (!this.launched) return;
 
   this.pending += chr;
-  this.recent = (this.recent + chr).slice(-32);
   if (!this.flushScheduled) {
     this.flushScheduled = true;
     var self = this;
@@ -151,15 +159,20 @@ V86Socket.prototype.output = function(chr) {
 
 V86Socket.prototype.flush = function() {
   this.flushScheduled = false;
-  if (this.pending) {
-    var data = this.pending;
-    this.pending = '';
+  var end = this.pending.indexOf(END);
+  var data, held;
+  if (end >= 0) {
+    data = this.pending.slice(0, end);
+  } else {
+    held = endPrefixLength(this.pending);
+    data = this.pending.slice(0, this.pending.length - held);
+    this.pending = this.pending.slice(data.length);
+  }
+  if (data) {
     this.reply({msg: 'tty', stream: Base64.encode(data)});
   }
-  // The Command exited: init respawned the shell on ttyS0. (The launch line
-  // is sent at a prompt that was printed before the Snapshot, so the first
-  // prompt seen after launch is the one after the Command.)
-  if (PROMPT_RE.test(this.recent)) {
+  if (end >= 0) {
+    this.pending = '';
     this.close();
   }
 };
