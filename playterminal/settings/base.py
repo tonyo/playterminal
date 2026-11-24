@@ -16,7 +16,7 @@ import os
 
 MAIN_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(MAIN_APP_DIR)
-DATA_DIR = os.path.join(BASE_DIR, 'data')
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
 # Quick-start development settings - unsuitable for production
@@ -28,81 +28,78 @@ DEBUG = False
 
 # Extra hosts (comma-separated) come from the environment, e.g. a LAN IP for a
 # local run reached from another machine.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'playtermin.al', 'pt'] + [
-    host.strip()
-    for host in os.getenv('ALLOWED_HOSTS', '').split(',')
-    if host.strip()
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "playtermin.al", "pt"] + [
+    host.strip() for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host.strip()
 ]
 
 
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django.contrib.flatpages',
-
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "django.contrib.flatpages",
     # App
-    'games',
+    "games",
 )
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'playterminal.urls'
+ROOT_URLCONF = "playterminal.urls"
 
 SITE_ID = 1
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'playterminal.wsgi.application'
+WSGI_APPLICATION = "playterminal.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(DATA_DIR, "db.sqlite3"),
     }
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -112,16 +109,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(MAIN_APP_DIR, 'collected_static')
+STATIC_ROOT = os.path.join(MAIN_APP_DIR, "collected_static")
 
 # URL prefix (ending in '/') of the VM Image and Snapshot files built by
 # playterminal-images/v86 (`mise run build` -> v86/out/). nginx serves them.
-V86_BASE_URL = os.getenv('V86_BASE_URL', '/v86/')
+V86_BASE_URL = os.getenv("V86_BASE_URL", "/v86/")
 
 # Try to get the secrets values from the environment
-secret_vars = ['SECRET_KEY']
+secret_vars = ["SECRET_KEY"]
 for var in secret_vars:
     value = os.getenv(var)
     if value:
@@ -130,14 +127,13 @@ for var in secret_vars:
 # Since Django 4.0 the CSRF check compares the Origin header with the host.
 # nginx forwards Host without the port, so a local run on a non-default port
 # (e.g. http://localhost:8090) must be listed here: comma-separated, with scheme.
-CSRF_TRUSTED_ORIGINS = ['https://playtermin.al'] + [
-    origin.strip()
-    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
-    if origin.strip()
+CSRF_TRUSTED_ORIGINS = ["https://playtermin.al"] + [
+    origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
 ]
 
 try:
     from .local import *  # noqa: F403
-    print('Loaded local settings')
+
+    print("Loaded local settings")
 except ImportError:
-    print('Skipping local settings')
+    print("Skipping local settings")

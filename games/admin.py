@@ -5,6 +5,7 @@ from games.models import Game
 
 
 class GameAdmin(ModelAdmin):
-    list_display = ('name', 'command', 'displayed')
+    list_display = ("name", "command", "displayed")
+
 
 admin.site.register(Game, GameAdmin)
