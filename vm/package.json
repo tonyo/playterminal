@@ -1,0 +1,8 @@
+{
+  "name": "playterminal-v86-image",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "v86": "0.5.473"
+  }
+}

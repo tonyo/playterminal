@@ -1,0 +1,62 @@
+[settings]
+minimum_release_age = "7d"
+lockfile = true
+lockfile_platforms = ["linux-x64", "linux-arm64"]
+
+[tools]
+node = "24.22.3"
+# Runs v86's image tools (fs2json.py, copy-to-sha256.py) with their `zstandard` dep.
+uv = "0.12"
+
+# Also needed on the host: Docker (builds the i386 image with --platform linux/386).
+# The emulator comes from npm v86@0.5.473 (package.json); the BIOS files and the two
+# image tools come from copy/v86 at the matching commit (scripts/fetch-upstream.sh).
+
+[tasks.setup]
+description = "Install npm v86 and fetch the pinned BIOS files and image tools"
+run = """
+set -eu
+npm ci --silent
+scripts/fetch-upstream.sh
+"""
+
+[tasks.image]
+description = "Build the Alpine i386 VM Image into out/fs.json + out/rootfs-flat (needs Docker)"
+depends = ["setup"]
+run = "scripts/build-image.sh"
+
+[tasks.assemble]
+description = "Copy the emulator, BIOS files and config.mjs into out/"
+depends = ["setup"]
+run = """
+set -eu
+mkdir -p out
+cp node_modules/v86/build/libv86.js node_modules/v86/build/v86.wasm out/
+cp .upstream/seabios.bin .upstream/vgabios.bin out/
+cp config.mjs out/
+"""
+
+[tasks.state]
+description = "Cold-boot out/ in node and save the Snapshot to out/state.bin.zst"
+depends = ["image", "assemble"]
+run = "node scripts/build-state.mjs"
+
+[tasks.verify]
+description = "Restore out/state.bin.zst in node and check the ttyS0 shell and robots"
+run = "node scripts/verify.mjs"
+
+[tasks.build]
+description = "Clean build of out/ (VM Image + Snapshot), then verify it"
+run = """
+set -eu
+# Empty out/ but keep the directory: a running bind mount of it (playterminal's
+# compose.local.yaml) would otherwise keep pointing at the deleted one.
+mkdir -p out
+find out -mindepth 1 -delete
+mise run state
+mise run verify
+"""
+
+[tasks.serve]
+description = "Serve out/ and the test page on port 8087"
+run = "python3 -m http.server --bind 127.0.0.1 -d . 8087"
