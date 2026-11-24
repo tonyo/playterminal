@@ -9,21 +9,35 @@ OUT=out
 TAR="$OUT"/rootfs.tar
 FLAT="$OUT"/rootfs-flat
 FSJSON="$OUT"/fs.json
-CONTAINER=playterminal-v86-image
-IMAGE=playterminal/v86-image
 TOOLS=.upstream
 UVRUN=(uv run --no-project --with zstandard==0.25.0 python)
 
 mkdir -p "$OUT"
-docker build image --platform linux/386 --rm --tag "$IMAGE"
-docker rm "$CONTAINER" >/dev/null 2>&1 || true
-docker create --platform linux/386 --name "$CONTAINER" "$IMAGE" >/dev/null
-docker export "$CONTAINER" -o "$TAR"
-docker rm "$CONTAINER" >/dev/null
-tar -f "$TAR" --delete ".dockerenv" || true
+# BuildKit writes the image's filesystem straight to a tar. Upstream instead runs
+# `docker create` + `docker export` + `tar --delete .dockerenv`, but GNU tar's
+# --delete corrupts that archive, and fs2json then silently drops every entry
+# after the damage (/var/log, /var/tmp, NetHack's sysconf, ...). The export also
+# carries Docker's runtime placeholders (an empty /etc/hostname, /etc/resolv.conf).
+docker build image --platform linux/386 --output type=tar,dest="$TAR"
 
 rm -rf "$FLAT" "$FSJSON"
 "${UVRUN[@]}" "$TOOLS"/fs2json.py --zstd --out "$FSJSON" "$TAR"
+# fs2json loses entries without failing; check that every tar entry made it.
+python3 -I - "$TAR" "$FSJSON" <<'EOF'
+import json, sys, tarfile
+names = {m.name.rstrip("/") for m in tarfile.open(sys.argv[1]).getmembers()} - {"", "."}
+seen = set()
+def walk(nodes, prefix):
+    for node in nodes:
+        seen.add(prefix + node[0])
+        if len(node) > 6 and isinstance(node[6], list):
+            walk(node[6], prefix + node[0] + "/")
+walk(json.load(open(sys.argv[2]))["fsroot"], "")
+missing = sorted(names - seen)
+if missing:
+    sys.exit(f"fs.json is missing {len(missing)} of {len(names)} tar entries: {missing[:10]}")
+print(f"fs.json has all {len(names)} tar entries")
+EOF
 mkdir -p "$FLAT"
 "${UVRUN[@]}" "$TOOLS"/copy-to-sha256.py --zstd "$TAR" "$FLAT"
 rm "$TAR"
