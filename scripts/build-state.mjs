@@ -1,6 +1,6 @@
-// Cold-boot out/ in node, wait for the root shell on the serial console (ttyS0), let it
-// go quiet, and save the zstd Snapshot the page restores. The game is driven over
-// serial0, so the Snapshot must sit at a quiet ttyS0 prompt.
+// Cold-boot out/ in node, wait for the PlayTerminal launcher to be ready on the serial
+// console (ttyS0), let it go quiet, and save the zstd Snapshot the page restores. Games are
+// launched over serial0, so the Snapshot must sit at the launcher waiting for its line.
 // Adapted from v86/tools/docker/alpine/build-state.js.
 import fs from "node:fs";
 import path from "node:path";
@@ -12,9 +12,8 @@ const out = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out"
 const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
 const target = snapshotUrl(out);
 
-// busybox ash prints the prompt, then a cursor-position query (ESC[6n) that it doesn't
-// wait on. Match on the per-byte stream so a prompt is never missed between polls.
-const PROMPT = /localhost:~# (\x1b\[6n)?$/;
+// Printed by image/playterminal-launcher each time it waits for a line.
+const READY = "\x1b]777;playterminal;ready\x07";
 const QUIET_MS = 3000;
 const TIMEOUT_MS = 180_000;
 
@@ -38,15 +37,11 @@ async function until(cond, what) {
     }
 }
 
-await until(() => PROMPT.test(serial), "the ttyS0 shell prompt");
-console.log(`ttyS0 shell prompt after ${secs()}`);
-
-// Drop the page cache so the saved RAM compresses better.
-const mark = serial.length;
-emulator.serial0_send("sync; echo 3 > /proc/sys/vm/drop_caches\n");
-await until(() => serial.length > mark && PROMPT.test(serial), "the prompt after drop_caches");
-await until(() => Date.now() - lastByte >= QUIET_MS && PROMPT.test(serial), "ttyS0 to go quiet");
-console.log(`ttyS0 quiet at a prompt after ${secs()}`);
+await until(() => serial.endsWith(READY), "the launcher on ttyS0");
+console.log(`ttyS0 launcher ready after ${secs()}`);
+await until(() => Date.now() - lastByte >= QUIET_MS, "ttyS0 to go quiet");
+if (!serial.endsWith(READY)) throw new Error("ttyS0 printed more after the launcher was ready");
+console.log(`ttyS0 quiet at the launcher after ${secs()}`);
 
 const state = new Uint8Array(await emulator.save_state());
 const zst = zlib.zstdCompressSync(state, {

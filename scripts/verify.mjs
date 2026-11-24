@@ -1,6 +1,8 @@
-// Restore out/state.bin.zst in node and check, over serial0 only:
-//  1. `echo hi` echoes, prints "hi" and returns to the prompt;
-//  2. `robots` starts and draws its board with ANSI escapes.
+// Restore out/state.bin.zst in node and check the launcher protocol over serial0 only:
+//  1. ttyS0 is quiet after the restore;
+//  2. "24 80 sh -c ..." runs at that size, without echoing the line, then prints END;
+//  3. the launcher is READY again and runs "24 80 robots", which draws its board;
+//  4. Ctrl-C ends robots with END, and the launcher is READY again.
 // Exits non-zero on failure.
 import path from "node:path";
 import url from "node:url";
@@ -9,7 +11,9 @@ import { V86 } from "v86";
 const out = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out") + "/";
 const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
 
-const PROMPT = /localhost:~# (\x1b\[6n)?$/;
+// Printed by image/playterminal-launcher.
+const READY = "\x1b]777;playterminal;ready\x07";
+const END = "\x1b]777;playterminal;exit\x07";
 const TIMEOUT_MS = 30_000;
 const t0 = Date.now();
 const secs = () => ((Date.now() - t0) / 1000).toFixed(2) + " s";
@@ -20,52 +24,51 @@ const emulator = new V86({ ...v86Options(out), initial_state: { url: snapshotUrl
 let serial = "";
 emulator.add_listener("serial0-output-byte", (b) => { serial += String.fromCharCode(b); });
 
+function fail(msg) {
+    console.error(`FAIL: ${msg}. ttyS0 so far:`, JSON.stringify(serial));
+    process.exit(1);
+}
 async function until(cond, what) {
     const start = Date.now();
     while (!cond()) {
-        if (Date.now() - start > TIMEOUT_MS) {
-            console.error(`FAIL: timed out waiting for ${what}. ttyS0 so far:`, JSON.stringify(serial));
-            process.exit(1);
-        }
+        if (Date.now() - start > TIMEOUT_MS) fail(`timed out waiting for ${what}`);
         await sleep(50);
     }
 }
-async function run(cmd) {
+// Send a launch line; resolve with everything up to END once the launcher is READY again.
+async function launch(line, during) {
     const mark = serial.length;
-    emulator.serial0_send(cmd + "\n");
-    await until(() => serial.length > mark && PROMPT.test(serial), `prompt after ${JSON.stringify(cmd)}`);
-    await sleep(200); // let a trailing ESC[6n arrive
-    return serial.slice(mark);
+    emulator.serial0_send(line + "\n");
+    if (during) await during(mark);
+    await until(() => serial.slice(mark).includes(END + READY), `END and READY after ${JSON.stringify(line)}`);
+    const s = serial.slice(mark);
+    return s.slice(0, s.indexOf(END));
 }
 
 await new Promise((r) => emulator.add_listener("emulator-ready", r));
 console.log(`Snapshot restored, emulator ready at ${secs()}`);
 await sleep(500);
-if (serial !== "") {
-    console.error("FAIL: ttyS0 not quiet after restore:", JSON.stringify(serial));
-    process.exit(1);
-}
+if (serial !== "") fail("ttyS0 not quiet after restore");
 console.log("ttyS0 quiet after restore: ok");
 
-const hi = await run("echo hi");
-console.log(`echo hi -> ${JSON.stringify(hi)} at ${secs()}`);
-if (!/^echo hi\r\nhi\r\nlocalhost:~# (\x1b\[6n)?$/.test(hi)) {
-    console.error("FAIL: unexpected echo hi output");
-    process.exit(1);
-}
+const probe = await launch("24 80 stty size; echo TERM=$TERM");
+console.log(`probe -> ${JSON.stringify(probe)} at ${secs()}`);
+if (probe.includes("stty size")) fail("the launch line was echoed");
+if (!probe.endsWith("24 80\r\nTERM=vt100\r\n")) fail("unexpected size or TERM");
 
-console.log("tty / TERM / stty:", JSON.stringify(await run("tty; echo TERM=$TERM; stty -a")));
+const drawn = await launch("24 80 robots", async (mark) => {
+    await until(() => {
+        const s = serial.slice(mark);
+        return s.includes("\x1b[") && s.includes("@") && s.includes("+") && s.length > 500;
+    }, "robots to draw");
+    await sleep(500);
+    console.log(`robots drew ${serial.length - mark} bytes at ${secs()}`);
+    console.log("robots output (head):", JSON.stringify(serial.slice(mark, mark + 300)));
+    emulator.serial0_send("\x03");
+});
+console.log(`Ctrl-C ended robots with END, launcher READY again at ${secs()}`);
+if (drawn.includes("localhost")) fail("a login prompt or motd reached ttyS0");
 
-const mark = serial.length;
-emulator.serial0_send("stty rows 24 cols 80; clear; exec robots\n");
-await until(() => {
-    const s = serial.slice(mark);
-    return s.includes("\x1b[") && s.includes("@") && s.includes("+") && s.length > 500;
-}, "robots to draw");
-await sleep(1000);
-const drawn = serial.slice(mark);
-console.log(`robots drew ${drawn.length} bytes of ANSI output at ${secs()}`);
-console.log("robots output (head):", JSON.stringify(drawn.slice(0, 400)));
 console.log("PASS");
 emulator.destroy();
 process.exit(0);

@@ -1,5 +1,6 @@
 # Based on v86's tools/docker/alpine/Dockerfile (at commit 315b2b0, the source of
-# npm v86@0.5.473). Changes: games instead of nodejs, no networking script.
+# npm v86@0.5.473). Changes: games instead of nodejs, no networking script,
+# a launcher instead of a login shell on ttyS0.
 FROM docker.io/i386/alpine:3.21.0
 
 ENV KERNEL=virt
@@ -8,7 +9,9 @@ ENV ADDPKGS="bsd-games nethack ncurses-terminfo-base"
 RUN apk add openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 
 RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
-RUN echo 'ttyS0::respawn:/sbin/agetty --autologin root -s ttyS0 115200 vt100' >> /etc/inittab
+# ttyS0 carries the Games: the launcher reads "<rows> <cols> <command>" lines.
+COPY --chmod=755 playterminal-launcher /usr/local/bin/playterminal-launcher
+RUN echo 'ttyS0::respawn:/usr/local/bin/playterminal-launcher' >> /etc/inittab
 RUN echo "root:" | chpasswd
 
 RUN setup-hostname localhost

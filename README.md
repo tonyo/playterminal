@@ -36,7 +36,7 @@ const emulator = new V86({ ...v86Options("./out/"), initial_state: { url: snapsh
 ## Sources
 
 - `image/Dockerfile`: v86's `tools/docker/alpine/Dockerfile` with `bsd-games` and `nethack`
-  instead of nodejs, and an autologin root shell on ttyS0.
+  instead of nodejs, and a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell.
 - The BIOS files and v86's `fs2json.py` / `copy-to-sha256.py` are downloaded from
   [copy/v86](https://github.com/copy/v86) (BSD-2-Clause) at commit `315b2b0`, the source of
   npm `v86@0.5.473`, and checked against pinned sha256 sums (`scripts/fetch-upstream.sh`).

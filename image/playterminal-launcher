@@ -1,0 +1,39 @@
+#!/bin/sh
+# PlayTerminal launcher: runs on ttyS0 in place of a login shell (see inittab).
+#
+# Protocol on ttyS0, one Game per line:
+#   page -> guest   "<rows> <cols> <command>\n"   (not echoed)
+#   guest -> page   the Command's output, then END when it exits
+# READY is printed whenever the launcher waits for a line; the Snapshot is taken
+# at the first one. Both markers are OSC sequences, which terminals don't display.
+READY='\033]777;playterminal;ready\007'
+END='\033]777;playterminal;exit\007'
+
+export TERM=vt100 HOME=/root
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+cd /root || exit 1
+
+# Ctrl-C / Ctrl-\ end the Command, not the launcher (a trap with a handler, unlike
+# an ignored signal, resets to the default in the Command). No Ctrl-Z: nothing
+# could resume a stopped Game.
+trap : INT QUIT
+idle() { stty sane -echo susp undef; }
+
+# Leave a small Snapshot: drop the page cache before the first READY.
+sync
+echo 3 > /proc/sys/vm/drop_caches
+
+idle
+while :; do
+    printf "$READY"
+    read -r rows cols command || continue
+    case "$rows$cols" in
+        ''|*[!0-9]*) continue ;;
+    esac
+    [ -n "$command" ] || continue
+    stty sane susp undef rows "$rows" cols "$cols"
+    clear
+    /bin/sh -c "$command"
+    idle
+    printf "$END"
+done
