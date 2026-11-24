@@ -11,9 +11,11 @@
  *   serial0 output -> {msg: 'tty', stream: <base64>}
  *
  * The Snapshot sits at the guest's launcher on ttyS0, which reads one line,
- * "<rows> <cols> <command>", runs the Command, and prints END when it exits
- * (playterminal-images v86/image/playterminal-launcher). END closes the
- * socket, which closes the Terminal Window. close() destroys the emulator.
+ * "<rows> <cols> <command>", runs the Command, prints END when it exits, then
+ * READY when it waits for the next line (playterminal-images
+ * v86/image/playterminal-launcher). When the Game ends, a new one starts in
+ * the same window: on READY after END the launch line is sent again. Closing
+ * the Terminal Window closes the socket, and close() destroys the emulator.
  *
  * Each emulator runs in its own hidden iframe, removed on close. With several
  * V86 instances created one after another in one page (v86 0.5.473), each
@@ -42,9 +44,11 @@ function createFrame(base) {
   });
 }
 
-// Printed by the launcher when the Command exits. An OSC sequence, so it would
-// not show in a terminal anyway; it is cut from the output.
+// Printed by the launcher when the Command exits, and when it then waits for
+// the next line. OSC sequences, so they would not show in a terminal anyway;
+// neither reaches it.
 var END = '\x1b]777;playterminal;exit\x07';
+var READY = '\x1b]777;playterminal;ready\x07';
 
 // Length of the longest tail of `s` that is a start of END: output that might
 // be the first bytes of END is held back until the next bytes show whether it is.
@@ -63,7 +67,9 @@ function V86Socket(options) {
   this.frame = null;
   this.emulator = null;
   this.closed = false;
-  this.launched = false;
+  this.launched = false;              // a Command is running
+  this.size = null;                   // {rows, cols} of the first launch
+  this.idle = '';                     // tail of the output between Games
   this.pending = '';                  // output not yet sent to the terminal
   this.flushScheduled = false;
 
@@ -141,13 +147,24 @@ V86Socket.prototype.attach = function() {
 
 V86Socket.prototype.launch = function(rows, cols) {
   this.launched = true;
+  this.size = {rows: rows, cols: cols};
   this.emulator.serial0_send(
     (rows | 0) + ' ' + (cols | 0) + ' ' + this.command + '\n');
 };
 
 V86Socket.prototype.output = function(chr) {
-  // Nothing is expected on the serial port before launch.
-  if (!this.launched) return;
+  if (!this.launched) {
+    // Between Games: wait for the launcher's READY, then start the next one.
+    // (Before the first launch nothing comes: READY was printed before the
+    // Snapshot was saved.)
+    if (!this.size) return;
+    this.idle = (this.idle + chr).slice(-READY.length);
+    if (this.idle === READY) {
+      this.idle = '';
+      this.launch(this.size.rows, this.size.cols);
+    }
+    return;
+  }
 
   this.pending += chr;
   if (!this.flushScheduled) {
@@ -172,8 +189,12 @@ V86Socket.prototype.flush = function() {
     this.reply({msg: 'tty', stream: Base64.encode(data)});
   }
   if (end >= 0) {
+    // The Game ended. What follows END (READY, maybe in part) goes through
+    // output() again, now between Games.
+    var rest = this.pending.slice(end + END.length);
     this.pending = '';
-    this.close();
+    this.launched = false;
+    for (var i = 0; i < rest.length; i++) this.output(rest[i]);
   }
 };
 
