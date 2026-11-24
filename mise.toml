@@ -49,7 +49,10 @@ run = "node scripts/verify.mjs"
 description = "Clean build of out/ (VM Image + Snapshot), then verify it"
 run = """
 set -eu
-rm -rf out
+# Empty out/ but keep the directory: a running bind mount of it (playterminal's
+# compose.local.yaml) would otherwise keep pointing at the deleted one.
+mkdir -p out
+find out -mindepth 1 -delete
 mise run state
 mise run verify
 """

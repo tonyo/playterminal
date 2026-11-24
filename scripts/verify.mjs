@@ -2,7 +2,8 @@
 //  1. ttyS0 is quiet after the restore;
 //  2. "24 80 sh -c ..." runs at that size, without echoing the line, then prints END;
 //  3. the launcher is READY again and runs "24 80 robots", which draws its board;
-//  4. Ctrl-C ends robots with END, and the launcher is READY again.
+//  4. Ctrl-C ends robots with END, the launcher is READY again (once), and runs the
+//     next line.
 // Exits non-zero on failure.
 import path from "node:path";
 import url from "node:url";
@@ -68,6 +69,15 @@ const drawn = await launch("24 80 robots", async (mark) => {
 });
 console.log(`Ctrl-C ended robots with END, launcher READY again at ${secs()}`);
 if (drawn.includes("localhost")) fail("a login prompt or motd reached ttyS0");
+
+// The page starts the next Game on READY, so Ctrl-C must leave exactly one, and the
+// launcher must still read the next line.
+await sleep(500);
+const afterEnd = serial.slice(serial.lastIndexOf(END));
+if (afterEnd !== END + READY) fail(`expected one READY after Ctrl-C, got ${JSON.stringify(afterEnd)}`);
+const again = await launch("24 80 echo again");
+if (!again.endsWith("again\r\n")) fail("the launcher did not run the next line after Ctrl-C");
+console.log(`one READY after Ctrl-C, next line runs: ok at ${secs()}`);
 
 console.log("PASS");
 emulator.destroy();

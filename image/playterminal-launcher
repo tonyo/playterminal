@@ -26,7 +26,9 @@ echo 3 > /proc/sys/vm/drop_caches
 idle
 while :; do
     printf "$READY"
-    read -r rows cols command || continue
+    # A Ctrl-C that ended the Command can still interrupt this read (the trap
+    # runs late); retry without a second READY, which the page would act on.
+    until read -r rows cols command; do :; done
     case "$rows$cols" in
         ''|*[!0-9]*) continue ;;
     esac
