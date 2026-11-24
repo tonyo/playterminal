@@ -8,4 +8,5 @@ urlpatterns = [
     path("game/<int:pk>/", views.GameDetailView.as_view(), name="game_detail"),
     path("games/", views.GameListView.as_view(), name="game_list"),
     path("about/", flatpages_views.flatpage, {"url": "/about/"}, name="about"),
+    path("licenses/", views.LicensesView.as_view(), name="licenses"),
 ]

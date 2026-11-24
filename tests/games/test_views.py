@@ -65,6 +65,18 @@ def test_game_detail_escapes_command_in_js_config(game, client):
     assert "\\u003C/script\\u003E" in content
 
 
+def test_licenses_links_the_vm_third_party_list(client, db, settings):
+    settings.V86_BASE_URL = "/vm/"
+
+    response = client.get(reverse("licenses"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert 'href="/vm/THIRD-PARTY.txt"' in content
+    assert "xterm-6.0.0/LICENSE" in content
+    assert f'href="{reverse("licenses")}"' in content
+
+
 @pytest.mark.parametrize("name, url", [("main", "/main/"), ("about", "/about/")])
 def test_flatpages_render(name, url, client, db):
     page = FlatPage.objects.create(url=url, title=name, content=f"{name} text")

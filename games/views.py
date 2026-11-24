@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from games.models import Game
 
@@ -23,3 +23,10 @@ class GameListView(ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(displayed=True)
+
+
+class LicensesView(TemplateView):
+    template_name = "games/licenses.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(v86_base=settings.V86_BASE_URL, **kwargs)
