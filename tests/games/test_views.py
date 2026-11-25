@@ -18,7 +18,16 @@ def test_game_list_shows_only_displayed_games(games, client):
 def test_games_file_lists_the_games_on_v86(client):
     response = client.get(reverse("game_list"))
 
-    assert [game.name for game in response.context["games"]] == ["Robots", "NetHack"]
+    shown = [game.name for game in response.context["games"]]
+    assert shown == ["Robots", "NetHack", "Tetris", "Greed", "Hangman"]
+
+
+def test_every_game_has_a_description_and_every_description_a_game():
+    slugs = {game.slug for game in catalog.all_games()}
+    files = {path.stem for path in catalog.DESCRIPTIONS_DIR.glob("*.txt")}
+
+    assert files == slugs
+    assert all(game.info for game in catalog.all_games())
 
 
 def test_games_file_has_unique_url_safe_slugs_and_commands():

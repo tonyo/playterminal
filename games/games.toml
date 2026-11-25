@@ -1,10 +1,9 @@
 # The Games, in the order the games page lists them. Each Game runs its Command in
-# the VM Image (vm/image/Dockerfile installs the packages), and vm/scripts/verify.mjs
-# checks that every Command is there.
+# the VM Image (vm/image/Dockerfile installs the programs), and vm/scripts/verify.mjs
+# checks that every Command is there. A Game's description is games/descriptions/<slug>.txt.
 #
-#   slug          the page URL: /game/<slug>/
+#   slug          the page URL (/game/<slug>/) and the description's file name
 #   name          the title on the games page and the Game's page
-#   info          the description on the Game's page
 #   command       the shell command that starts the Game in the VM Image
 #   displayed     listed on the games page (optional, default false)
 #   refresh_code  a key code sent after each launch to redraw (optional)
@@ -12,29 +11,29 @@
 [[game]]
 slug = "robots"
 name = "Robots"
-info = """
-Robots is a classic game from the BSD games collection.
-
-You are surrounded by robots that chase you around the board. Make them crash into each other and into the junk heaps they leave behind. Teleport when cornered.
-
-Move with h, j, k, l, y, u, b, n. Press t to teleport, w to wait for the robots."""
 command = "robots"
 displayed = true
 
 [[game]]
 slug = "nethack"
 name = "NetHack"
-info = """
-NetHack is the classic roguelike, first released in 1987.
-
-Explore the Dungeons of Doom, fight its monsters, and retrieve the Amulet of Yendor. Every game is a new dungeon, and a death is final.
-
-Move with h, j, k, l, y, u, b, n. Press ? for help and the full list of commands, and Ctrl-C to quit."""
 command = "nethack"
+displayed = true
+
+[[game]]
+slug = "tetris"
+name = "Tetris"
+command = "tetris"
+displayed = true
+
+[[game]]
+slug = "greed"
+name = "Greed"
+command = "greed"
 displayed = true
 
 [[game]]
 slug = "hangman"
 name = "Hangman"
-info = "Guess the word, one letter at a time, before the man is hanged."
-command = "hangman"
+command = "hangman -d /usr/share/dict/american-english"
+displayed = true

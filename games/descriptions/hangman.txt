@@ -1,0 +1,7 @@
+The computer thinks of a word and the player tries to guess it by suggesting letters, within a certain number of guesses.
+
+"The origins of Hangman are obscure meaning not discovered, but it seems to have arisen in Victorian times," says Tony Augarde, author of The Oxford Guide to Word Games.
+
+This is Hangman from the BSD games collection, with an American English word list. Each wrong letter adds a piece to the gallows, and the man is hanged when the drawing is complete.
+
+Type a letter to guess it. Press space for the next word and Enter to quit.

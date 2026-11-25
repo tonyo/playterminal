@@ -1,4 +1,4 @@
-"""The Games, read from games.toml."""
+"""The Games, read from games.toml, with their descriptions from descriptions/<slug>.txt."""
 
 import tomllib
 from dataclasses import dataclass
@@ -8,6 +8,7 @@ from pathlib import Path
 from django.urls import reverse
 
 GAMES_FILE = Path(__file__).with_name("games.toml")
+DESCRIPTIONS_DIR = Path(__file__).with_name("descriptions")
 
 
 @dataclass(frozen=True)
@@ -27,7 +28,12 @@ class Game:
 def all_games():
     """Every Game in games.toml, in file order."""
     with GAMES_FILE.open("rb") as f:
-        return tuple(Game(**fields) for fields in tomllib.load(f)["game"])
+        games = tomllib.load(f)["game"]
+    return tuple(Game(info=description(fields["slug"]), **fields) for fields in games)
+
+
+def description(slug):
+    return (DESCRIPTIONS_DIR / f"{slug}.txt").read_text().strip()
 
 
 def displayed_games():
