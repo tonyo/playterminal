@@ -5,8 +5,8 @@
  * port (ttyS0) in an xterm.js terminal, which v86's own xterm.js adapter
  * connects: output bytes go to the terminal, keystrokes go to the guest.
  *
- * The Snapshot sits at the guest's launcher on ttyS0 (playterminal-images
- * v86/image/playterminal-launcher). It reads one line,
+ * The Snapshot sits at the guest's launcher on ttyS0
+ * (vm/image/playterminal-launcher). It reads one line,
  * "<rows> <cols> <command>", runs the Command, prints END when it exits, then
  * READY when it waits for the next line. Both markers are OSC sequences,
  * which xterm.js does not display. The window sends the launch line when it
