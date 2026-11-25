@@ -12,3 +12,12 @@ div#sidebar > div {
 .game-info {
   white-space: pre-wrap;
 }
+
+/* The ASCII-art logo on the main page. */
+.ascii-logo {
+  float: left;
+  border: none;
+  background-color: white;
+  font-weight: bold;
+  font-size: 18px;
+}

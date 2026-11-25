@@ -42,8 +42,6 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",
-    "django.contrib.flatpages",
     # App
     "games",
 )
@@ -59,8 +57,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "playterminal.urls"
-
-SITE_ID = 1
 
 TEMPLATES = [
     {

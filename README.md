@@ -43,7 +43,6 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
 
    ```
    mise run up
-   mise run seed
    docker compose exec playterminal-server python manage.py createsuperuser
    ```
 
@@ -51,9 +50,9 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
    `docker compose` commands run against the local stack. `mise run down`
    stops it.
 
-   `mise run seed` loads the site and the main and about pages. The Games
-   are listed in `games/games.toml`, not in the database. Play runs the
-   Game's Command in v86 inside the browser: nothing runs on the server.
+   The pages are templates in `games/templates/games/` and the Games are
+   listed in `games/games.toml`: nothing to load into the database. Play runs
+   the Game's Command in v86 inside the browser: nothing runs on the server.
 
 5. Run the tests: `mise run test`. Run every pre-commit hook on all files,
    which also formats the JS, CSS and templates: `mise run lint`; format the
