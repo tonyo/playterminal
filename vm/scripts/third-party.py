@@ -104,7 +104,7 @@ def main(tar_path, v86_license_path, out_path):
         "----------------------------------------",
         "",
         "/usr/local/bin/playterminal-launcher and the image build scripts:",
-        "MIT, https://github.com/tonyo/playterminal/tree/master/vm",
+        "MIT, https://github.com/tonyo/playterminal (LICENSE)",
         "",
     ]
     with open(out_path, "w") as f:

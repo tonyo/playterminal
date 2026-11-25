@@ -6,8 +6,8 @@ Games, and a Snapshot of it booted to a root shell on the serial console (ttyS0)
 restores the Snapshot and drives the Game over v86's `serial0`; it sends the terminal size
 on `serial1` (ttyS1) when the window is resized.
 
-This directory came from the playterminal-images repo and is under its MIT license
-([LICENSE](LICENSE)); the rest of PlayTerminal is Apache-2.0.
+This directory came from the playterminal-images repo. Like the rest of PlayTerminal, it is
+under the MIT license ([LICENSE](../LICENSE)).
 
 ## Build
 
