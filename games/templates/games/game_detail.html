@@ -11,9 +11,9 @@
 {% block content %}
   <h1>{{ object.name }}</h1>
   <br />
-  <div style="white-space: pre-wrap;">{{ object.info }}</div>
+  <div class="game-info">{{ object.info }}</div>
   <br />
-  <button id="open-terminal-btn" class="btn btn-info">Play</button>
+  <button id="open-terminal-btn" type="button" class="btn btn-info">Play</button>
   <br />
   <br />
   <div id="status-message" class="alert alert-danger" role="alert" hidden></div>

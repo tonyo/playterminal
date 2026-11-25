@@ -18,7 +18,9 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
 (`pyproject.toml`, locked in `uv.lock`). `mise tasks` lists the tasks.
 
 1. Run `mise install && mise run setup`: it installs the tools, the
-   dependencies and the git pre-commit hooks (ruff and file checks).
+   dependencies and the git pre-commit hooks: ruff for Python, Biome for
+   the JS and CSS (`biome.jsonc`), djLint for the Django templates
+   (`[tool.djlint]` in `pyproject.toml`), and file checks.
 
 2. Create `.env.local` (gitignored):
 
@@ -52,8 +54,9 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
    Play runs the Game's Command in v86 inside the browser: nothing runs on
    the server.
 
-5. Run the tests: `mise run test`. Run every pre-commit hook on all files:
-   `mise run lint`; format the Python code: `mise run format`.
+5. Run the tests: `mise run test`. Run every pre-commit hook on all files,
+   which also formats the JS, CSS and templates: `mise run lint`; format the
+   Python code: `mise run format`.
 
 Dependency updates: change `pyproject.toml` if needed, then run `uv lock`
 (or `uv lock --upgrade`). Both uv (`exclude-newer`) and mise

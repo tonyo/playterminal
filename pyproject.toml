@@ -34,3 +34,5 @@ select = ["E", "F", "I"]
 profile = "django"
 indent = 2
 max_line_length = 100
+# H036 (no <br> for spacing): the page layout uses <br> deliberately.
+ignore = "H036"

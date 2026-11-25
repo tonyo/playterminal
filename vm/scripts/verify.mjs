@@ -11,7 +11,7 @@ import path from "node:path";
 import url from "node:url";
 import { V86 } from "v86";
 
-const out = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out") + "/";
+const out = `${path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out")}/`;
 const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
 
 // Printed by image/playterminal-launcher.
@@ -19,7 +19,7 @@ const READY = "\x1b]777;playterminal;ready\x07";
 const END = "\x1b]777;playterminal;exit\x07";
 const TIMEOUT_MS = 30_000;
 const t0 = Date.now();
-const secs = () => ((Date.now() - t0) / 1000).toFixed(2) + " s";
+const secs = () => `${((Date.now() - t0) / 1000).toFixed(2)} s`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const emulator = new V86({ ...v86Options(out), initial_state: { url: snapshotUrl(out) } });
@@ -43,7 +43,7 @@ async function until(cond, what) {
 // Send a launch line; resolve with everything up to END once the launcher is READY again.
 async function launch(line, during) {
   const mark = serial.length;
-  emulator.serial0_send(line + "\n");
+  emulator.serial0_send(`${line}\n`);
   if (during) await during(mark);
   await until(
     () => serial.slice(mark).includes(END + READY),

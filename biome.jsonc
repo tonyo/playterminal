@@ -1,3 +1,4 @@
+// Biome lints and formats the JS and CSS; run by the pre-commit hook (`mise run lint`).
 {
   "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
@@ -6,6 +7,7 @@
       "**/*.js",
       "**/*.mjs",
       "**/*.css",
+      // Vendored files stay as upstream ships them.
       "!games/static/games/vendor",
       "!**/*.min.js",
       "!**/*.min.css",
@@ -17,10 +19,23 @@
   "linter": { "rules": { "preset": "recommended" } },
   "javascript": {
     "formatter": { "quoteStyle": "single" },
+    // Page globals: jQuery, xterm.js, our TerminalWindow, the game_detail.html config and v86.
     "globals": ["jQuery", "$", "Terminal", "TerminalWindow", "gameConfig", "V86"]
   },
   "overrides": [
     {
+      // The page scripts are plain scripts in the jQuery style: function expressions (jQuery
+      // handlers rely on `this`) and string concatenation.
+      "includes": ["games/static/**"],
+      "linter": {
+        "rules": {
+          "complexity": { "useArrowFunction": "off" },
+          "style": { "useTemplate": "off" }
+        }
+      }
+    },
+    {
+      // The VM Image scripts are ES modules run by node, written with double quotes.
       "includes": ["vm/**"],
       "javascript": { "formatter": { "quoteStyle": "double" } }
     }

@@ -20,3 +20,18 @@ repos:
         exclude: &vendored ^games/static/games/(vendor/|.*\.min\.(js|css)$)
       - id: end-of-file-fixer
         exclude: *vendored
+
+  # JS and CSS: lint, then format (config in biome.jsonc). Runs on the node from mise.toml.
+  - repo: https://github.com/biomejs/pre-commit
+    rev: 19865851e014cbe6138e295365f95ca51bf953f8 # v0.6.1
+    hooks:
+      - id: biome-check
+        additional_dependencies: ["@biomejs/biome@2.6.8"]
+        language_version: system
+
+  # Django templates and vm/test.html: format, then lint (config in pyproject.toml).
+  - repo: https://github.com/djlint/djLint
+    rev: 9cf2467f5e6af251156f9b08a7a78ed11a89cc1d # v1.50.0
+    hooks:
+      - id: djlint-reformat-django
+      - id: djlint-django

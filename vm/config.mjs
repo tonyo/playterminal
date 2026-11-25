@@ -4,14 +4,14 @@
 // ending in "/". The build copies this file into that dir next to the files it names.
 export function v86Options(base) {
   return {
-    wasm_path: base + "v86.wasm",
-    bios: { url: base + "seabios.bin" },
-    vga_bios: { url: base + "vgabios.bin" },
+    wasm_path: `${base}v86.wasm`,
+    bios: { url: `${base}seabios.bin` },
+    vga_bios: { url: `${base}vgabios.bin` },
     memory_size: 128 * 1024 * 1024,
     vga_memory_size: 8 * 1024 * 1024,
     filesystem: {
-      baseurl: base + "rootfs-flat",
-      basefs: base + "fs.json",
+      baseurl: `${base}rootfs-flat`,
+      basefs: `${base}fs.json`,
     },
     bzimage_initrd_from_filesystem: true,
     cmdline:
@@ -24,5 +24,5 @@ export function v86Options(base) {
 
 // URL/path of the Snapshot, relative to the same `base`.
 export function snapshotUrl(base) {
-  return base + "state.bin.zst";
+  return `${base}state.bin.zst`;
 }

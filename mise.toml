@@ -9,6 +9,8 @@ python = "3.14.10"
 uv = "0.13"
 # Runs the git hooks in .pre-commit-config.yaml.
 pre-commit = "4.7.0"
+# For the Biome hook (JS and CSS); same version as vm/.
+node = "24.22.3"
 
 [env]
 _.python.venv = { path = ".venv", create = true }
@@ -20,7 +22,7 @@ depends = ["sync"]
 run = "pre-commit install"
 
 [tasks.lint]
-description = "Run the pre-commit hooks (ruff, YAML/JSON/TOML checks, whitespace) on every file"
+description = "Run the pre-commit hooks (ruff, Biome, djLint, YAML/JSON/TOML checks, whitespace) on every file"
 run = "pre-commit run --all-files"
 
 [tasks.format]

@@ -90,11 +90,11 @@
   var THEME_KEY = 'playterminal.theme';
 
   function savedTheme() {
-    var name;
+    var name, i;
     try {
       name = window.localStorage.getItem(THEME_KEY);
-    } catch (e) {}
-    for (var i = 0; i < THEMES.length; i++) {
+    } catch {}
+    for (i = 0; i < THEMES.length; i++) {
       if (THEMES[i].name === name) return THEMES[i];
     }
     return THEMES[0];
@@ -103,7 +103,7 @@
   function saveTheme(theme) {
     try {
       window.localStorage.setItem(THEME_KEY, theme.name);
-    } catch (e) {}
+    } catch {}
   }
 
   // The font sizes the bar's − and + step through; the default is TERMINAL_OPTIONS'.
@@ -114,14 +114,14 @@
     var size;
     try {
       size = parseInt(window.localStorage.getItem(FONT_SIZE_KEY), 10);
-    } catch (e) {}
+    } catch {}
     return FONT_SIZES.indexOf(size) >= 0 ? size : TERMINAL_OPTIONS.fontSize;
   }
 
   function saveFontSize(size) {
     try {
       window.localStorage.setItem(FONT_SIZE_KEY, String(size));
-    } catch (e) {}
+    } catch {}
   }
 
   // A hidden iframe with libv86.js loaded; resolves to the iframe.
@@ -130,9 +130,9 @@
       var frame = document.createElement('iframe');
       frame.style.display = 'none';
       frame.setAttribute('aria-hidden', 'true');
-      frame.srcdoc = '<!DOCTYPE html><script src="' + base + 'libv86.js"><\/script>';
+      frame.srcdoc = '<!DOCTYPE html><script src="' + base + 'libv86.js"></script>';
       frame.onload = function () {
-        if (frame.contentWindow && frame.contentWindow.V86) {
+        if (frame.contentWindow?.V86) {
           resolve(frame);
         } else {
           frame.remove();
@@ -282,12 +282,14 @@
   // Step the font size; the terminal keeps its rows and columns. The window grows or
   // shrinks, so move it to keep the clicked button under the pointer for the next click.
   TerminalWindow.prototype.zoom = function (step, tab) {
-    var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step;
+    var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step,
+      before,
+      left;
     if (i >= 0 && i < FONT_SIZES.length) {
-      var before = tab.getBoundingClientRect().left;
+      before = tab.getBoundingClientRect().left;
       this.setFontSize(FONT_SIZES[i]);
       saveFontSize(FONT_SIZES[i]);
-      var left = this.element.position().left + before - tab.getBoundingClientRect().left;
+      left = this.element.position().left + before - tab.getBoundingClientRect().left;
       this.element.css('left', Math.max(0, left)); // but keep the window on the page
     }
     this.term.focus();

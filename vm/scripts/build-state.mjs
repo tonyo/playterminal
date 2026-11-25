@@ -8,7 +8,7 @@ import url from "node:url";
 import zlib from "node:zlib";
 import { V86 } from "v86";
 
-const out = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out") + "/";
+const out = `${path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out")}/`;
 const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
 const target = snapshotUrl(out);
 
@@ -18,7 +18,7 @@ const QUIET_MS = 3000;
 const TIMEOUT_MS = 180_000;
 
 const t0 = Date.now();
-const secs = () => ((Date.now() - t0) / 1000).toFixed(1) + " s";
+const secs = () => `${((Date.now() - t0) / 1000).toFixed(1)} s`;
 const emulator = new V86(v86Options(out));
 console.log("Booting…");
 
@@ -48,7 +48,7 @@ const zst = zlib.zstdCompressSync(state, {
   params: { [zlib.constants.ZSTD_c_compressionLevel]: 19 },
 });
 fs.writeFileSync(target, zst);
-const kb = (n) => (n / 1024).toFixed(0) + " KiB";
+const kb = (n) => `${(n / 1024).toFixed(0)} KiB`;
 console.log(`Saved ${target}: ${kb(zst.length)} (raw ${kb(state.byteLength)})`);
 console.log("Last ttyS0 output:", JSON.stringify(serial.slice(-120)));
 emulator.destroy();
