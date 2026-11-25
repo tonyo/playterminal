@@ -1,4 +1,4 @@
-// Restore out/state.bin.zst in node and check the launcher protocol over serial0 only:
+// Restore the Snapshot out/config.mjs names in node and check the launcher protocol over serial0 only:
 //  1. ttyS0 is quiet after the restore;
 //  2. "24 80 sh -c ..." runs at that size, without echoing the line, then prints END;
 //  3. the launcher is READY again and runs "24 80 robots", which draws its board;
