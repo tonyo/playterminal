@@ -39,6 +39,42 @@ var TERMINAL_OPTIONS = {
   theme: {background: '#000000', foreground: '#f0f0f0'}
 };
 
+// A monochrome phosphor palette: every ANSI color is a shade of one hue.
+function phosphor(bg, dark, dim, fg, bright) {
+  return {
+    background: bg, foreground: fg, cursor: fg, cursorAccent: bg,
+    selectionBackground: dim,
+    black: dark, red: dim, green: fg, yellow: fg,
+    blue: dim, magenta: dim, cyan: fg, white: fg,
+    brightBlack: dim, brightRed: fg, brightGreen: bright, brightYellow: bright,
+    brightBlue: fg, brightMagenta: fg, brightCyan: bright, brightWhite: bright
+  };
+}
+
+// The themes the bar's ◐ cycles through. crt adds scanlines and glow.
+var THEMES = [
+  {name: 'classic', title: 'Classic', crt: false, colors: TERMINAL_OPTIONS.theme},
+  {name: 'green', title: 'Green phosphor', crt: true,
+   colors: phosphor('#031006', '#0c3315', '#1f9940', '#33ff66', '#99ffbb')},
+  {name: 'amber', title: 'Amber phosphor', crt: true,
+   colors: phosphor('#120a00', '#3d2600', '#b37a00', '#ffb000', '#ffd780')}
+];
+
+var THEME_KEY = 'playterminal.theme';
+
+function savedTheme() {
+  var name;
+  try { name = window.localStorage.getItem(THEME_KEY); } catch (e) {}
+  for (var i = 0; i < THEMES.length; i++) {
+    if (THEMES[i].name === name) return THEMES[i];
+  }
+  return THEMES[0];
+}
+
+function saveTheme(theme) {
+  try { window.localStorage.setItem(THEME_KEY, theme.name); } catch (e) {}
+}
+
 // A hidden iframe with libv86.js loaded; resolves to the iframe.
 function createFrame(base) {
   return new Promise(function(resolve, reject) {
@@ -76,6 +112,8 @@ function TerminalWindow(options) {
   this.emulator = null;
   this.element = null;
   this.term = null;
+  this.theme = null;
+  this.themeTab = null;
   this.closed = false;
   this.launched = false;  // a Command is running
   this.tail = '';         // the last bytes from ttyS0, to spot END and READY
@@ -123,8 +161,10 @@ TerminalWindow.prototype.open = function() {
 
   var close = $('<div class="tab" title="Close terminal">✖</div>')
     .on('click', function() { self.close(); });
+  this.themeTab = $('<div class="tab">◐</div>')
+    .on('click', function() { self.nextTheme(); });
   var bar = $('<div class="bar">')
-    .append(close, $('<div class="title">').text(this.options.command));
+    .append(close, $('<div class="title">').text(this.options.command), this.themeTab);
   var screen = $('<div class="screen">');
   this.element = $('<div class="window">').append(bar, screen).appendTo(document.body);
   this.draggable(bar);
@@ -135,10 +175,28 @@ TerminalWindow.prototype.open = function() {
     return self.term;
   }
   this.emulator.set_serial_container_xtermjs(screen[0], Terminal);
+  this.setTheme(savedTheme());
   this.term.focus();
 
   this.launch();
   (this.options.onOpen || noop)();
+};
+
+TerminalWindow.prototype.setTheme = function(theme) {
+  this.theme = theme;
+  this.term.options.theme = theme.colors;
+  this.element
+    .removeClass(THEMES.map(function(t) { return 'theme-' + t.name; }).join(' '))
+    .addClass('theme-' + theme.name)
+    .toggleClass('crt', theme.crt);
+  this.themeTab.attr('title', 'Theme: ' + theme.title + ' (click to change)');
+};
+
+TerminalWindow.prototype.nextTheme = function() {
+  var theme = THEMES[(THEMES.indexOf(this.theme) + 1) % THEMES.length];
+  this.setTheme(theme);
+  saveTheme(theme);
+  this.term.focus();
 };
 
 // Drag the window by its bar.
@@ -198,7 +256,7 @@ TerminalWindow.prototype.close = function() {
   if (this.element) this.element.remove();
   var emulator = this.emulator
     , frame = this.frame;
-  this.emulator = this.frame = this.element = this.term = null;
+  this.emulator = this.frame = this.element = this.term = this.themeTab = null;
   if (emulator) {
     // destroy() also disposes of the terminal.
     emulator.destroy().catch(function(err) {
