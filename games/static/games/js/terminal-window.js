@@ -10,8 +10,8 @@
  * "<rows> <cols> <command>", runs the Command, prints END when it exits, then
  * READY when it waits for the next line. Both markers are OSC sequences,
  * which xterm.js does not display. The window sends the launch line when it
- * opens, and again on READY after END, so a finished Game restarts in the
- * same window. Only ✖ closes the window and destroys the emulator.
+ * opens, and again a second after READY follows END, so a finished Game
+ * restarts in the same window. Only ✖ closes the window and destroys the emulator.
  *
  * The corner grip resizes the terminal in whole cells. The window sends the
  * new size as "<rows> <cols>" on serial1, where the guest sets ttyS0's size
@@ -32,6 +32,8 @@
   // Printed by the launcher.
   var END = '\x1b]777;playterminal;exit\x07';
   var READY = '\x1b]777;playterminal;ready\x07';
+  // The pause before a finished Game starts again.
+  var RESTART_DELAY_MS = 1000;
 
   // Added to the options v86 creates its xterm.js terminal with.
   var TERMINAL_OPTIONS = {
@@ -186,6 +188,7 @@
     this.launched = false; // a Command is running
     this.tail = ''; // the last bytes from ttyS0, to spot END and READY
     this.resizeTimer = null;
+    this.restartTimer = null;
     this.start();
   }
 
@@ -427,7 +430,8 @@
     } else if (this.tail === READY) {
       // The Game ended and the launcher waits for a line: start the next one.
       this.tail = '';
-      this.launch();
+      this.launched = true; // ignore output until the launch
+      this.restartTimer = setTimeout(this.launch.bind(this), RESTART_DELAY_MS);
     }
   };
 
@@ -441,6 +445,7 @@
     if (this.closed) return;
     this.closed = true;
     clearTimeout(this.resizeTimer);
+    clearTimeout(this.restartTimer);
     this.stopTracking();
     if (this.element) this.element.remove();
     var emulator = this.emulator,
