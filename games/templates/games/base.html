@@ -8,17 +8,13 @@
     <meta name="keywords" content="PlayTerminal,Games,Terminal,ASCII,v86">
     <meta name="author" content="Anton Ovchinnikov">
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="{% static "games/css/bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "games/css/base-styles.css" %}">
-    <!-- JS -->
-    <script src="{% static "games/js/jquery-2.1.4.min.js" %}" defer></script>
     {% block head %}{% endblock %}
     <title>PlayTerminal</title>
   </head>
   <body>
-    <div id="page-content" class="container">
-      <br />
-      <div class="col-md-3">
+    <div id="page-content">
+      <div class="column-side">
         <a href="{% url 'game_list' %}">
           <img src="{% static "games/img/play_logo.png" %}"
                width="250"
@@ -41,7 +37,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-8">
+      <div class="column-main">
         {% block content %}{% endblock %}
       </div>
     </div>

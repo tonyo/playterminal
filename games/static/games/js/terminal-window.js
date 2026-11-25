@@ -23,7 +23,7 @@
  * doubles with every instance (1 s, 2 s, 5 s, 10 s, 20 s). A fresh iframe
  * per emulator gives v86 a fresh JS realm and the stall goes away.
  */
-(function (window, $) {
+(function (window) {
   // The terminal starts at this size and can't be resized below it: most
   // terminal games need at least 80x24.
   var ROWS = 24;
@@ -145,6 +145,23 @@
 
   function noop() {}
 
+  // A <div> with this class, and children: elements or text.
+  function div(className, children) {
+    var el = document.createElement('div');
+    el.className = className;
+    if (typeof children === 'string') el.textContent = children;
+    else if (children) el.append.apply(el, children);
+    return el;
+  }
+
+  // A button on the window's bar.
+  function tab(text, title, onClick) {
+    var el = div('tab', text);
+    if (title) el.title = title;
+    el.addEventListener('click', onClick);
+    return el;
+  }
+
   /**
    * options:
    *   base         URL prefix of the VM files, ends in '/'
@@ -212,37 +229,38 @@
     if (this.closed) return;
     var self = this;
 
-    var close = $('<div class="tab" title="Close terminal">✖</div>').on('click', function () {
+    var close = tab('✖', 'Close terminal', function () {
       self.close();
     });
-    this.zoomOutTab = $('<div class="tab" title="Smaller text">−</div>').on('click', function () {
+    this.zoomOutTab = tab('−', 'Smaller text', function () {
       self.zoom(-1, this);
     });
-    this.zoomInTab = $('<div class="tab" title="Larger text">+</div>').on('click', function () {
+    this.zoomInTab = tab('+', 'Larger text', function () {
       self.zoom(1, this);
     });
-    this.themeTab = $('<div class="tab">◐</div>').on('click', function () {
+    this.themeTab = tab('◐', '', function () {
       self.nextTheme();
     });
-    var bar = $('<div class="bar">').append(
+    var bar = div('bar', [
       close,
-      $('<div class="title">').text(this.options.command),
+      div('title', this.options.command),
       this.zoomOutTab,
       this.zoomInTab,
       this.themeTab,
-    );
-    var screen = $('<div class="screen">');
-    var grip = $('<div class="grip" title="Resize">');
-    this.element = $('<div class="window">').append(bar, screen, grip).appendTo(document.body);
+    ]);
+    var screen = div('screen');
+    var grip = div('grip');
+    grip.title = 'Resize';
+    this.element = document.body.appendChild(div('window', [bar, screen, grip]));
     this.draggable(bar);
     this.resizable(grip);
 
     // v86 creates the terminal with its own options: add ours, keep the instance.
     function Terminal(options) {
-      self.term = new window.Terminal($.extend({}, options, TERMINAL_OPTIONS));
+      self.term = new window.Terminal(Object.assign({}, options, TERMINAL_OPTIONS));
       return self.term;
     }
-    this.emulator.set_serial_container_xtermjs(screen[0], Terminal);
+    this.emulator.set_serial_container_xtermjs(screen, Terminal);
     this.setTheme(savedTheme());
     this.setFontSize(savedFontSize());
     this.term.focus();
@@ -254,15 +272,13 @@
   TerminalWindow.prototype.setTheme = function (theme) {
     this.theme = theme;
     this.term.options.theme = theme.colors;
-    this.element
-      .removeClass(
-        THEMES.map(function (t) {
-          return 'theme-' + t.name;
-        }).join(' '),
-      )
-      .addClass('theme-' + theme.name)
-      .toggleClass('crt', theme.crt);
-    this.themeTab.attr('title', 'Theme: ' + theme.title + ' (click to change)');
+    var classes = this.element.classList;
+    THEMES.forEach(function (t) {
+      classes.remove('theme-' + t.name);
+    });
+    classes.add('theme-' + theme.name);
+    classes.toggle('crt', theme.crt);
+    this.themeTab.title = 'Theme: ' + theme.title + ' (click to change)';
   };
 
   TerminalWindow.prototype.nextTheme = function () {
@@ -275,8 +291,8 @@
   TerminalWindow.prototype.setFontSize = function (size) {
     this.term.options.fontSize = size;
     var i = FONT_SIZES.indexOf(size);
-    this.zoomOutTab.toggleClass('disabled', i === 0);
-    this.zoomInTab.toggleClass('disabled', i === FONT_SIZES.length - 1);
+    this.zoomOutTab.classList.toggle('disabled', i === 0);
+    this.zoomInTab.classList.toggle('disabled', i === FONT_SIZES.length - 1);
   };
 
   // Step the font size; the terminal keeps its rows and columns. The window grows or
@@ -289,8 +305,8 @@
       before = tab.getBoundingClientRect().left;
       this.setFontSize(FONT_SIZES[i]);
       saveFontSize(FONT_SIZES[i]);
-      left = this.element.position().left + before - tab.getBoundingClientRect().left;
-      this.element.css('left', Math.max(0, left)); // but keep the window on the page
+      left = this.element.offsetLeft + before - tab.getBoundingClientRect().left;
+      this.element.style.left = Math.max(0, left) + 'px'; // but keep the window on the page
     }
     this.term.focus();
   };
@@ -299,63 +315,76 @@
   TerminalWindow.prototype.draggable = function (bar) {
     var self = this,
       el = this.element;
-    bar.on('mousedown', function (ev) {
-      if ($(ev.target).is('.tab')) return;
+    bar.addEventListener('mousedown', function (ev) {
+      if (ev.target.classList.contains('tab')) return;
       ev.preventDefault();
-      var start = el.position(),
+      var start = { left: el.offsetLeft, top: el.offsetTop },
         x = ev.pageX,
         y = ev.pageY;
-      $(document)
-        .on('mousemove.terminal-window', function (ev) {
-          // Not above the top of the page, where the bar could not be grabbed again.
-          el.css({ left: start.left + ev.pageX - x, top: Math.max(0, start.top + ev.pageY - y) });
-        })
-        .on('mouseup.terminal-window', function () {
-          $(document).off('.terminal-window');
-          if (self.term) self.term.focus();
-        });
+      self.track(function (ev) {
+        el.style.left = start.left + ev.pageX - x + 'px';
+        // Not above the top of the page, where the bar could not be grabbed again.
+        el.style.top = Math.max(0, start.top + ev.pageY - y) + 'px';
+      });
     });
   };
 
   // Resize the terminal by dragging the grip, in whole cells, within the page.
   TerminalWindow.prototype.resizable = function (grip) {
     var self = this;
-    grip.on('mousedown', function (ev) {
+    grip.addEventListener('mousedown', function (ev) {
       ev.preventDefault();
-      var cells = self.element.find('.xterm-screen'),
-        cellWidth = cells.width() / self.cols,
-        cellHeight = cells.height() / self.rows,
+      var cells = self.element.querySelector('.xterm-screen').getBoundingClientRect(),
+        frame = self.element.getBoundingClientRect(),
+        cellWidth = cells.width / self.cols,
+        cellHeight = cells.height / self.rows,
         start = { cols: self.cols, rows: self.rows, x: ev.pageX, y: ev.pageY },
-        offset = self.element.offset(),
-        spare = {
-          // room for the window's frame around the cells
-          x: self.element.outerWidth() - cells.width(),
-          y: self.element.outerHeight() - cells.height(),
-        },
+        // room for the window's frame around the cells
+        spare = { x: frame.width - cells.width, y: frame.height - cells.height },
         maxCols = Math.max(
           COLS,
-          Math.floor(($(document).width() - offset.left - spare.x) / cellWidth),
+          Math.floor(
+            (document.documentElement.scrollWidth - (frame.left + window.scrollX) - spare.x) /
+              cellWidth,
+          ),
         ),
+        // down to the bottom of the viewport
         maxRows = Math.max(
           ROWS,
-          Math.floor(
-            ($(window).height() + $(window).scrollTop() - offset.top - spare.y) / cellHeight,
-          ),
+          Math.floor((document.documentElement.clientHeight - frame.top - spare.y) / cellHeight),
         );
-      $(document)
-        .on('mousemove.terminal-window', function (ev) {
-          var cols = start.cols + Math.round((ev.pageX - start.x) / cellWidth),
-            rows = start.rows + Math.round((ev.pageY - start.y) / cellHeight);
-          self.resize(
-            Math.min(maxCols, Math.max(COLS, cols)),
-            Math.min(maxRows, Math.max(ROWS, rows)),
-          );
-        })
-        .on('mouseup.terminal-window', function () {
-          $(document).off('.terminal-window');
-          if (self.term) self.term.focus();
-        });
+      self.track(function (ev) {
+        var cols = start.cols + Math.round((ev.pageX - start.x) / cellWidth),
+          rows = start.rows + Math.round((ev.pageY - start.y) / cellHeight);
+        self.resize(
+          Math.min(maxCols, Math.max(COLS, cols)),
+          Math.min(maxRows, Math.max(ROWS, rows)),
+        );
+      });
     });
+  };
+
+  // Call onMove on every mouse move until the button is released, then give the
+  // terminal back the focus.
+  TerminalWindow.prototype.track = function (onMove) {
+    var self = this;
+    this.stopTracking();
+    this.tracking = new AbortController();
+    var options = { signal: this.tracking.signal };
+    document.addEventListener('mousemove', onMove, options);
+    document.addEventListener(
+      'mouseup',
+      function () {
+        self.stopTracking();
+        if (self.term) self.term.focus();
+      },
+      options,
+    );
+  };
+
+  TerminalWindow.prototype.stopTracking = function () {
+    if (this.tracking) this.tracking.abort();
+    this.tracking = null;
   };
 
   TerminalWindow.prototype.resize = function (cols, rows) {
@@ -412,7 +441,7 @@
     if (this.closed) return;
     this.closed = true;
     clearTimeout(this.resizeTimer);
-    $(document).off('.terminal-window');
+    this.stopTracking();
     if (this.element) this.element.remove();
     var emulator = this.emulator,
       frame = this.frame;
@@ -441,4 +470,4 @@
   };
 
   window.TerminalWindow = TerminalWindow;
-})(window, jQuery);
+})(window);

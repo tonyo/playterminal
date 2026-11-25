@@ -19,13 +19,13 @@
   "linter": { "rules": { "preset": "recommended" } },
   "javascript": {
     "formatter": { "quoteStyle": "single" },
-    // Page globals: jQuery, xterm.js, our TerminalWindow, the game_detail.html config and v86.
-    "globals": ["jQuery", "$", "Terminal", "TerminalWindow", "gameConfig", "V86"]
+    // Page globals: xterm.js, our TerminalWindow, the game_detail.html config and v86.
+    "globals": ["Terminal", "TerminalWindow", "gameConfig", "V86"]
   },
   "overrides": [
     {
-      // The page scripts are plain scripts in the jQuery style: function expressions (jQuery
-      // handlers rely on `this`) and string concatenation.
+      // The page scripts are plain scripts: function expressions (the bar's click handlers
+      // rely on `this`) and string concatenation.
       "includes": ["games/static/**"],
       "linter": {
         "rules": {

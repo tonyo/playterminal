@@ -19,7 +19,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 20px; /* the window's padding-top; Bootstrap makes this border-box */
+  height: 20px; /* the window's padding-top; base-styles.css makes this border-box */
   padding: 0 6px;
   display: flex;
   align-items: center;

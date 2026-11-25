@@ -1,22 +1,34 @@
+function playButton() {
+  return document.getElementById('open-terminal-btn');
+}
+
+function statusMessage() {
+  return document.getElementById('status-message');
+}
+
+function setCursor(cursor) {
+  document.body.style.cursor = cursor;
+}
+
 function enablePlayButton() {
-  $('#open-terminal-btn').prop('disabled', false);
+  playButton().disabled = false;
 }
 
 function disablePlayButton() {
-  $('#open-terminal-btn').prop('disabled', true);
+  playButton().disabled = true;
 }
 
 function showStatus(text, kind) {
-  $('#status-message')
-    .removeClass('alert-info alert-danger')
-    .addClass('alert-' + kind)
-    .text(text)
-    .show();
+  var status = statusMessage();
+  status.classList.remove('alert-info', 'alert-danger');
+  status.classList.add('alert-' + kind);
+  status.textContent = text;
+  status.hidden = false;
 }
 
 function hideStatus() {
-  $('#status-message').hide();
-  $('body').css('cursor', 'default');
+  statusMessage().hidden = true;
+  setCursor('default');
 }
 
 function showProgress(e) {
@@ -29,7 +41,7 @@ function showProgress(e) {
 
 function openTerminal() {
   disablePlayButton();
-  $('body').css('cursor', 'progress');
+  setCursor('progress');
   showStatus('Loading the game…', 'info');
   new TerminalWindow({
     base: gameConfig.v86Base,
@@ -39,12 +51,11 @@ function openTerminal() {
     onOpen: hideStatus,
     onError: function () {
       showStatus('Something went wrong. Try again in a few minutes.', 'danger');
-      $('body').css('cursor', 'default');
+      setCursor('default');
     },
     onClose: enablePlayButton,
   });
 }
 
-$(document).ready(function () {
-  $('#open-terminal-btn').click(openTerminal);
-});
+// The script is deferred, so the page is parsed by now.
+playButton().addEventListener('click', openTerminal);
