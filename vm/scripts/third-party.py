@@ -71,7 +71,7 @@ def main(tar_path, v86_license_path, out_path):
         f"Source: https://github.com/coreboot/seabios/tree/{SEABIOS}",
         "",
         "",
-        f"3. Alpine Linux {ALPINE} packages (fs.json, rootfs-flat/, state.bin.zst)",
+        f"3. Alpine Linux {ALPINE} packages (fs-*.json, rootfs-flat/, state-*.bin.zst)",
         "---------------------------------------------------------------------",
         "",
         "The VM image and its saved state hold these Alpine packages (i386). Each package's",

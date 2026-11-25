@@ -37,12 +37,16 @@ cp config.mjs out/
 """
 
 [tasks.state]
-description = "Cold-boot out/ in node and save the Snapshot to out/state.bin.zst"
+description = "Cold-boot out/ in node, save the Snapshot, then name it and fs.json by content hash"
 depends = ["image", "assemble"]
-run = "node scripts/build-state.mjs"
+run = """
+set -eu
+node scripts/build-state.mjs
+node scripts/stamp.mjs
+"""
 
 [tasks.verify]
-description = "Restore out/state.bin.zst in node and check the ttyS0 shell and robots"
+description = "Restore the Snapshot in node and check the launcher, robots and every Command"
 run = "node scripts/verify.mjs"
 
 [tasks.build]

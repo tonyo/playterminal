@@ -30,10 +30,10 @@ CI (`.github/workflows/vm.yml`) runs `mise run build` whenever `vm/` changes and
 |---|---|
 | `libv86.js`, `v86.wasm` | emulator, from npm `v86@0.5.473` |
 | `seabios.bin`, `vgabios.bin` | BIOS files |
-| `fs.json`, `rootfs-flat/` | the VM Image as v86 9p-over-HTTP (index + sha256-named zstd blobs, fetched on demand) |
-| `state.bin.zst` | the Snapshot |
+| `fs-<hash>.json`, `rootfs-flat/` | the VM Image as v86 9p-over-HTTP (index + sha256-named zstd blobs, fetched on demand) |
+| `state-<hash>.bin.zst` | the Snapshot |
 | `THIRD-PARTY.txt` | licenses and source pointers for the emulator, BIOS files and every Alpine package in the VM Image (`scripts/third-party.py`, from the image's apk database) |
-| `config.mjs` | `v86Options(base)` and `snapshotUrl(base)`; the page must use these exact options or the Snapshot won't restore |
+| `config.mjs` | `v86Options(base)` and `snapshotUrl(base)`, which name the files above; the page must use these exact options or the Snapshot won't restore |
 
 Serve `out/` as static files and, in the page:
 
