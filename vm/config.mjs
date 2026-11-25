@@ -15,6 +15,8 @@ export function v86Options(base) {
         },
         bzimage_initrd_from_filesystem: true,
         cmdline: "rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose modules=virtio_pci tsc=reliable",
+        // ttyS1: the page sends the terminal size there (image/playterminal-resize).
+        uart1: true,
         autostart: true,
     };
 }

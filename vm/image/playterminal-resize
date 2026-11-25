@@ -1,0 +1,12 @@
+#!/bin/sh
+# PlayTerminal resize: runs on ttyS1 (see inittab), next to the launcher on ttyS0.
+#
+# The page sends "<rows> <cols>\n" on ttyS1 whenever the window is resized; this
+# sets ttyS0's size, and the kernel sends SIGWINCH to the running Game.
+stty -echo
+while read -r rows cols; do
+    case "$rows$cols" in
+        ''|*[!0-9]*) continue ;;
+    esac
+    stty -F /dev/ttyS0 rows "$rows" cols "$cols"
+done

@@ -3,7 +3,9 @@
 //  2. "24 80 sh -c ..." runs at that size, without echoing the line, then prints END;
 //  3. the launcher is READY again and runs "24 80 robots", which draws its board;
 //  4. Ctrl-C ends robots with END, the launcher is READY again (once), and runs the
-//     next line.
+//     next line;
+//  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
+//     Command gets SIGWINCH.
 // Exits non-zero on failure.
 import path from "node:path";
 import url from "node:url";
@@ -78,6 +80,17 @@ if (afterEnd !== END + READY) fail(`expected one READY after Ctrl-C, got ${JSON.
 const again = await launch("24 80 echo again");
 if (!again.endsWith("again\r\n")) fail("the launcher did not run the next line after Ctrl-C");
 console.log(`one READY after Ctrl-C, next line runs: ok at ${secs()}`);
+
+// The Command prints its size on SIGWINCH; Ctrl-C ends it.
+const resized = await launch(
+    "24 80 trap 'stty size' WINCH; echo waiting; while :; do sleep 0.2; done",
+    async (mark) => {
+        await until(() => serial.slice(mark).includes("waiting"), "the WINCH probe to start");
+        emulator.serial_send_bytes(1, new TextEncoder().encode("30 100\n"));
+        await until(() => serial.slice(mark).includes("30 100"), "SIGWINCH with the new size");
+        emulator.serial0_send("\x03");
+    });
+console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
 
 console.log("PASS");
 emulator.destroy();

@@ -13,6 +13,10 @@
  * opens, and again on READY after END, so a finished Game restarts in the
  * same window. Only ✖ closes the window and destroys the emulator.
  *
+ * The corner grip resizes the terminal in whole cells. The window sends the
+ * new size as "<rows> <cols>" on serial1, where the guest sets ttyS0's size
+ * and the Game gets SIGWINCH (vm/image/playterminal-resize).
+ *
  * Each emulator runs in its own hidden iframe, removed on close. With several
  * V86 instances created one after another in one page (v86 0.5.473), each
  * new guest stalls for a while after the Snapshot is restored, and the stall
@@ -21,7 +25,8 @@
  */
 ;(function(window, $) {
 
-// The terminal size is fixed for the whole Game.
+// The terminal starts at this size and can't be resized below it: most
+// terminal games need at least 80x24.
 var ROWS = 24;
 var COLS = 80;
 
@@ -75,6 +80,20 @@ function saveTheme(theme) {
   try { window.localStorage.setItem(THEME_KEY, theme.name); } catch (e) {}
 }
 
+// The font sizes the bar's − and + step through; the default is TERMINAL_OPTIONS'.
+var FONT_SIZES = [10, 12, 14, 16, 18, 20, 24];
+var FONT_SIZE_KEY = 'playterminal.fontSize';
+
+function savedFontSize() {
+  var size;
+  try { size = parseInt(window.localStorage.getItem(FONT_SIZE_KEY), 10); } catch (e) {}
+  return FONT_SIZES.indexOf(size) >= 0 ? size : TERMINAL_OPTIONS.fontSize;
+}
+
+function saveFontSize(size) {
+  try { window.localStorage.setItem(FONT_SIZE_KEY, String(size)); } catch (e) {}
+}
+
 // A hidden iframe with libv86.js loaded; resolves to the iframe.
 function createFrame(base) {
   return new Promise(function(resolve, reject) {
@@ -112,11 +131,14 @@ function TerminalWindow(options) {
   this.emulator = null;
   this.element = null;
   this.term = null;
+  this.rows = ROWS;
+  this.cols = COLS;
   this.theme = null;
-  this.themeTab = null;
+  this.themeTab = this.zoomInTab = this.zoomOutTab = null;
   this.closed = false;
   this.launched = false;  // a Command is running
   this.tail = '';         // the last bytes from ttyS0, to spot END and READY
+  this.resizeTimer = null;
   this.start();
 }
 
@@ -161,13 +183,20 @@ TerminalWindow.prototype.open = function() {
 
   var close = $('<div class="tab" title="Close terminal">✖</div>')
     .on('click', function() { self.close(); });
+  this.zoomOutTab = $('<div class="tab" title="Smaller text">−</div>')
+    .on('click', function() { self.zoom(-1); });
+  this.zoomInTab = $('<div class="tab" title="Larger text">+</div>')
+    .on('click', function() { self.zoom(1); });
   this.themeTab = $('<div class="tab">◐</div>')
     .on('click', function() { self.nextTheme(); });
   var bar = $('<div class="bar">')
-    .append(close, $('<div class="title">').text(this.options.command), this.themeTab);
+    .append(close, $('<div class="title">').text(this.options.command),
+            this.zoomOutTab, this.zoomInTab, this.themeTab);
   var screen = $('<div class="screen">');
-  this.element = $('<div class="window">').append(bar, screen).appendTo(document.body);
+  var grip = $('<div class="grip" title="Resize">');
+  this.element = $('<div class="window">').append(bar, screen, grip).appendTo(document.body);
   this.draggable(bar);
+  this.resizable(grip);
 
   // v86 creates the terminal with its own options: add ours, keep the instance.
   function Terminal(options) {
@@ -176,6 +205,7 @@ TerminalWindow.prototype.open = function() {
   }
   this.emulator.set_serial_container_xtermjs(screen[0], Terminal);
   this.setTheme(savedTheme());
+  this.setFontSize(savedFontSize());
   this.term.focus();
 
   this.launch();
@@ -199,6 +229,23 @@ TerminalWindow.prototype.nextTheme = function() {
   this.term.focus();
 };
 
+TerminalWindow.prototype.setFontSize = function(size) {
+  this.term.options.fontSize = size;
+  var i = FONT_SIZES.indexOf(size);
+  this.zoomOutTab.toggleClass('disabled', i === 0);
+  this.zoomInTab.toggleClass('disabled', i === FONT_SIZES.length - 1);
+};
+
+// Step the font size; the terminal keeps its rows and columns.
+TerminalWindow.prototype.zoom = function(step) {
+  var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step;
+  if (i >= 0 && i < FONT_SIZES.length) {
+    this.setFontSize(FONT_SIZES[i]);
+    saveFontSize(FONT_SIZES[i]);
+  }
+  this.term.focus();
+};
+
 // Drag the window by its bar.
 TerminalWindow.prototype.draggable = function(bar) {
   var self = this
@@ -210,7 +257,9 @@ TerminalWindow.prototype.draggable = function(bar) {
       , x = ev.pageX
       , y = ev.pageY;
     $(document).on('mousemove.terminal-window', function(ev) {
-      el.css({left: start.left + ev.pageX - x, top: start.top + ev.pageY - y});
+      // Not above the top of the page, where the bar could not be grabbed again.
+      el.css({left: start.left + ev.pageX - x,
+              top: Math.max(0, start.top + ev.pageY - y)});
     }).on('mouseup.terminal-window', function() {
       $(document).off('.terminal-window');
       if (self.term) self.term.focus();
@@ -218,12 +267,59 @@ TerminalWindow.prototype.draggable = function(bar) {
   });
 };
 
+// Resize the terminal by dragging the grip, in whole cells, within the page.
+TerminalWindow.prototype.resizable = function(grip) {
+  var self = this;
+  grip.on('mousedown', function(ev) {
+    ev.preventDefault();
+    var cells = self.element.find('.xterm-screen')
+      , cellWidth = cells.width() / self.cols
+      , cellHeight = cells.height() / self.rows
+      , start = {cols: self.cols, rows: self.rows, x: ev.pageX, y: ev.pageY}
+      , offset = self.element.offset()
+      , spare = {  // room for the window's frame around the cells
+          x: self.element.outerWidth() - cells.width(),
+          y: self.element.outerHeight() - cells.height()
+        }
+      , maxCols = Math.max(COLS, Math.floor(
+          ($(document).width() - offset.left - spare.x) / cellWidth))
+      , maxRows = Math.max(ROWS, Math.floor(
+          ($(window).height() + $(window).scrollTop() - offset.top - spare.y) / cellHeight));
+    $(document).on('mousemove.terminal-window', function(ev) {
+      var cols = start.cols + Math.round((ev.pageX - start.x) / cellWidth)
+        , rows = start.rows + Math.round((ev.pageY - start.y) / cellHeight);
+      self.resize(
+        Math.min(maxCols, Math.max(COLS, cols)),
+        Math.min(maxRows, Math.max(ROWS, rows)));
+    }).on('mouseup.terminal-window', function() {
+      $(document).off('.terminal-window');
+      if (self.term) self.term.focus();
+    });
+  });
+};
+
+TerminalWindow.prototype.resize = function(cols, rows) {
+  if (cols === this.cols && rows === this.rows) return;
+  this.cols = cols;
+  this.rows = rows;
+  this.term.resize(cols, rows);
+  // Tell the guest after the drag settles: each size is a SIGWINCH and a redraw.
+  var self = this;
+  clearTimeout(this.resizeTimer);
+  this.resizeTimer = setTimeout(function() {
+    if (self.emulator) {
+      self.emulator.serial_send_bytes(1,
+        new TextEncoder().encode(self.rows + ' ' + self.cols + '\n'));
+    }
+  }, 100);
+};
+
 TerminalWindow.prototype.launch = function() {
   this.launched = true;
   // Ctrl-U first: it drops anything typed while no Game was running, so the
   // launcher reads just this line.
   this.emulator.serial0_send(
-    '\x15' + ROWS + ' ' + COLS + ' ' + this.options.command + '\n');
+    '\x15' + this.rows + ' ' + this.cols + ' ' + this.options.command + '\n');
   if (this.options.refreshCode) {
     this.emulator.serial0_send(String.fromCharCode(this.options.refreshCode));
   }
@@ -252,11 +348,12 @@ TerminalWindow.prototype.fail = function(err) {
 TerminalWindow.prototype.close = function() {
   if (this.closed) return;
   this.closed = true;
+  clearTimeout(this.resizeTimer);
   $(document).off('.terminal-window');
   if (this.element) this.element.remove();
   var emulator = this.emulator
     , frame = this.frame;
-  this.emulator = this.frame = this.element = this.term = this.themeTab = null;
+  this.emulator = this.frame = this.element = this.term = this.themeTab = this.zoomInTab = this.zoomOutTab = null;
   if (emulator) {
     // destroy() also disposes of the terminal.
     emulator.destroy().catch(function(err) {
