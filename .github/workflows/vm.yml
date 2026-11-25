@@ -1,14 +1,14 @@
 name: VM Image
 
-# Builds the VM Image and Snapshot from vm/ and verifies them (boot, shell, robots),
-# only when vm/ changes: the build takes a few minutes.
+# Builds the VM Image and Snapshot from vm/ and verifies them (boot, shell, robots, every
+# Game's Command), only when vm/ or the Games change: the build takes a few minutes.
 on:
   push:
     branches: [master]
-    paths: ["vm/**", ".github/workflows/vm.yml"]
+    paths: ["vm/**", "games/games.toml", ".github/workflows/vm.yml"]
   pull_request:
     branches: [master]
-    paths: ["vm/**", ".github/workflows/vm.yml"]
+    paths: ["vm/**", "games/games.toml", ".github/workflows/vm.yml"]
   workflow_dispatch:
 
 permissions:

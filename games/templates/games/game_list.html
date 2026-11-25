@@ -2,9 +2,9 @@
 {% block content %}
   <h1>All games</h1>
   <hr />
-  {% for object in object_list %}
+  {% for game in games %}
     <p>
-      <a href="{{ object.get_absolute_url }}">{{ object.name }}</a>
+      <a href="{{ game.get_absolute_url }}">{{ game.name }}</a>
     </p>
   {% empty %}
     No games.

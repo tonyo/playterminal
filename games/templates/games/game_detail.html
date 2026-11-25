@@ -9,9 +9,9 @@
   <script src="{% static "games/js/playterminal.js" %}" defer></script>
 {% endblock %}
 {% block content %}
-  <h1>{{ object.name }}</h1>
+  <h1>{{ game.name }}</h1>
   <br />
-  <div class="game-info">{{ object.info }}</div>
+  <div class="game-info">{{ game.info }}</div>
   <br />
   <button id="open-terminal-btn" type="button" class="btn btn-info">Play</button>
   <br />

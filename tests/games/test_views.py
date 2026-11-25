@@ -1,63 +1,75 @@
+import re
+
 import pytest
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.sites.models import Site
-from django.core.management import call_command
 from django.urls import reverse
 
-from games.models import Game
+from games import catalog
 
 
-def test_game_list_shows_only_displayed_games(game, client):
-    Game.objects.create(name="Tetris", info="hidden", displayed=False)
-
+def test_game_list_shows_only_displayed_games(games, client):
     response = client.get(reverse("game_list"))
 
     assert response.status_code == 200
     content = response.content.decode()
-    assert "Robots" in content
+    assert 'href="/game/robots/"' in content
     assert "Tetris" not in content
 
 
-def test_seed_lists_the_games_on_v86(client, db):
-    call_command("loaddata", "seed", verbosity=0)
-
+def test_games_file_lists_the_games_on_v86(client):
     response = client.get(reverse("game_list"))
 
-    shown = [game.name for game in response.context["object_list"]]
-    assert sorted(shown) == ["NetHack", "Robots"]
+    assert [game.name for game in response.context["games"]] == ["Robots", "NetHack"]
+
+
+def test_games_file_has_unique_url_safe_slugs_and_commands():
+    games = catalog.all_games()
+    slugs = [game.slug for game in games]
+
+    assert len(set(slugs)) == len(slugs)
+    assert all(re.fullmatch(r"[a-z0-9-]+", slug) for slug in slugs)
+    assert all(game.command for game in games)
 
 
 def test_game_detail_has_play_button(game, client):
-    response = client.get(game.get_absolute_url())
+    response = client.get("/game/robots/")
 
     assert response.status_code == 200
-    assert 'id="open-terminal-btn"' in response.content.decode()
+    content = response.content.decode()
+    assert "<h1>Robots</h1>" in content
+    assert 'id="open-terminal-btn"' in content
 
 
-def test_game_detail_renders_command_into_js_config(game, client, settings):
+def test_hidden_game_still_has_a_page(games, client):
+    assert client.get("/game/tetris/").status_code == 200
+
+
+def test_unknown_game_is_404(games, client):
+    assert client.get("/game/pong/").status_code == 404
+
+
+def test_game_detail_renders_command_into_js_config(client, settings, monkeypatch):
     settings.V86_BASE_URL = "/vm/"
-    game.command = "robots"
-    game.refresh_code = 12
-    game.save()
+    game = catalog.Game(slug="robots", name="Robots", info="", command="robots", refresh_code=12)
+    monkeypatch.setattr(catalog, "all_games", lambda: (game,))
 
     response = client.get(game.get_absolute_url())
 
     assert response.context["game_config"] == {
-        "id": game.id,
         "command": "robots",
         "refreshCode": 12,
         "v86Base": "/vm/",
     }
     assert (
         '<script id="game-config" type="application/json">'
-        f'{{"id": {game.id}, "command": "robots", "refreshCode": 12, '
-        '"v86Base": "/vm/"}</script>'
+        '{"command": "robots", "refreshCode": 12, "v86Base": "/vm/"}</script>'
     ) in response.content.decode()
 
 
-def test_game_detail_escapes_command_in_js_config(game, client):
-    game.command = "</script><script>alert(1)"
-    game.save()
+def test_game_detail_escapes_command_in_js_config(client, monkeypatch):
+    game = catalog.Game(slug="x", name="X", info="", command="</script><script>alert(1)")
+    monkeypatch.setattr(catalog, "all_games", lambda: (game,))
 
     content = client.get(game.get_absolute_url()).content.decode()
 
@@ -86,10 +98,3 @@ def test_flatpages_render(name, url, client, db):
 
     assert response.status_code == 200
     assert f"{name} text" in response.content.decode()
-
-
-def test_admin_lists_games(game, admin_client):
-    response = admin_client.get(reverse("admin:games_game_changelist"))
-
-    assert response.status_code == 200
-    assert "Robots" in response.content.decode()

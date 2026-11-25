@@ -5,13 +5,16 @@
 //  4. Ctrl-C ends robots with END, the launcher is READY again (once), and runs the
 //     next line;
 //  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
-//     Command gets SIGWINCH.
+//     Command gets SIGWINCH;
+//  6. every Game's Command in ../games/games.toml is installed.
 // Exits non-zero on failure.
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import url from "node:url";
 import { V86 } from "v86";
 
-const out = `${path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out")}/`;
+const here = path.dirname(url.fileURLToPath(import.meta.url));
+const out = `${path.join(here, "../out")}/`;
 const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
 
 // Printed by image/playterminal-launcher.
@@ -98,6 +101,17 @@ const resized = await launch(
   },
 );
 console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
+
+// The program each Command runs: its first word. games.toml is plain enough that the
+// command lines can be read without a TOML parser.
+const games = readFileSync(path.join(here, "../../games/games.toml"), "utf8");
+const programs = [...games.matchAll(/^command = "(\S+).*"$/gm)].map((m) => m[1]);
+if (programs.length === 0) fail("no Commands found in games.toml");
+const found = await launch(
+  `24 80 for p in ${programs.join(" ")}; do command -v $p >/dev/null || echo MISSING $p; done`,
+);
+if (found.includes("MISSING")) fail(`Commands not in the VM Image: ${JSON.stringify(found)}`);
+console.log(`every Game's Command is installed (${programs.join(", ")}): ok at ${secs()}`);
 
 console.log("PASS");
 emulator.destroy();

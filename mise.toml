@@ -50,7 +50,7 @@ docker compose exec -T playterminal-server sh -c \
 """
 
 [tasks.seed]
-description = "Load the seed Games into the local stack"
+description = "Load the site and the main and about pages into the local stack"
 run = "docker compose exec -T playterminal-server python manage.py loaddata seed"
 
 [tasks.down]
