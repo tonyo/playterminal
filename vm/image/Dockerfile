@@ -1,12 +1,25 @@
 # Based on v86's tools/docker/alpine/Dockerfile (at commit 315b2b0, the source of
 # npm v86@0.5.473). Changes: games instead of nodejs, no networking script,
 # a launcher instead of a login shell on ttyS0.
+
+# Greed is not packaged for Alpine: build ESR's last C release, 4.5 (5.x is a Rust
+# rewrite), in its own stage and copy only the binary into the VM Image.
+FROM docker.io/i386/alpine:3.21.0 AS greed
+ARG GREED_COMMIT=79799d1ba4b1bbc30c13d2b6725ab5ce5dbc5c32
+RUN apk add build-base ncurses-dev git
+RUN git clone --depth 1 --branch 4.5 https://gitlab.com/esr/greed.git /src \
+    && test "$(git -C /src rev-parse HEAD)" = "$GREED_COMMIT" \
+    && make -C /src greed
+
 FROM docker.io/i386/alpine:3.21.0
 
 ENV KERNEL=virt
-ENV ADDPKGS="bsd-games nethack ncurses-terminfo-base"
+# bsd-games: robots and hangman; words-en: hangman's word list; micro-tetris: tetris.
+ENV ADDPKGS="bsd-games nethack micro-tetris words-en ncurses-libs ncurses-terminfo-base"
 
 RUN apk add openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
+COPY --from=greed /src/greed /usr/bin/greed
+COPY --from=greed /src/COPYING /usr/share/licenses/greed/COPYING
 
 RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
 # ttyS0 carries the Games: the launcher reads "<rows> <cols> <command>" lines.

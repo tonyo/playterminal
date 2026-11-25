@@ -16,7 +16,8 @@ Needs [mise](https://mise.jdx.dev) and Docker (the image is built with
 
 ```sh
 mise run build     # clean build of out/, then `mise run verify`
-mise run verify    # restore the Snapshot in node; check the launcher, `robots` and resizing
+mise run verify    # restore the Snapshot in node; check the launcher, `robots`, resizing and
+                   # that every Command in ../games/games.toml is installed
 mise run serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
 
@@ -43,8 +44,9 @@ const emulator = new V86({ ...v86Options("./out/"), initial_state: { url: snapsh
 
 ## Sources
 
-- `image/Dockerfile`: v86's `tools/docker/alpine/Dockerfile` with `bsd-games` and `nethack`
-  instead of nodejs, a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell,
+- `image/Dockerfile`: v86's `tools/docker/alpine/Dockerfile` with the games instead of nodejs
+  (Alpine's `bsd-games`, `nethack`, `micro-tetris` and `words-en`, plus Greed 4.5 built from
+  [source](https://gitlab.com/esr/greed) in a separate stage), a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell,
   and `image/playterminal-resize` on ttyS1, which sets ttyS0's size.
 - The BIOS files and v86's `fs2json.py` / `copy-to-sha256.py` are downloaded from
   [copy/v86](https://github.com/copy/v86) (BSD-2-Clause) at commit `315b2b0`, the source of

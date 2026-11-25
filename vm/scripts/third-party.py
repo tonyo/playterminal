@@ -1,5 +1,5 @@
-"""Write out/THIRD-PARTY.txt: the licenses of the emulator, BIOS files and every Alpine
-package in the VM Image, with where to get their source.
+"""Write out/THIRD-PARTY.txt: the licenses of the emulator, BIOS files, every Alpine
+package in the VM Image and the programs built from source, with where to get their source.
 
 Usage: third-party.py ROOTFS_TAR V86_LICENSE OUT_FILE
 
@@ -14,6 +14,8 @@ ALPINE = "3.21"
 V86_COMMIT = "315b2b0b758703ef0e6cc7b4088d6068f83f3c20"
 SEABIOS = "rel-1.16.2"
 APORTS = "https://gitlab.alpinelinux.org/alpine/aports/-/tree"
+# Built from source by image/Dockerfile; keep in step with its GREED_COMMIT.
+GREED_COMMIT = "79799d1ba4b1bbc30c13d2b6725ab5ce5dbc5c32"
 
 
 def installed_packages(tar_path):
@@ -29,8 +31,14 @@ def installed_packages(tar_path):
     return sorted(packages, key=lambda p: p["P"])
 
 
+def read_member(tar_path, name):
+    with tarfile.open(tar_path) as tar:
+        return tar.extractfile(name).read().decode().strip()
+
+
 def main(tar_path, v86_license_path, out_path):
     packages = installed_packages(tar_path)
+    greed_license = read_member(tar_path, "usr/share/licenses/greed/COPYING")
     with open(v86_license_path) as f:
         v86_license = f.read().strip()
 
@@ -82,7 +90,17 @@ def main(tar_path, v86_license_path, out_path):
         ]
     lines += [
         "",
-        "4. PlayTerminal's own files in the image",
+        "4. Programs built from source",
+        "-----------------------------",
+        "",
+        "Greed 4.5 (/usr/bin/greed), by Eric S. Raymond",
+        "License: BSD-2-Clause",
+        f"Source: https://gitlab.com/esr/greed/-/tree/{GREED_COMMIT}",
+        "",
+        greed_license,
+        "",
+        "",
+        "5. PlayTerminal's own files in the image",
         "----------------------------------------",
         "",
         "/usr/local/bin/playterminal-launcher and the image build scripts:",
