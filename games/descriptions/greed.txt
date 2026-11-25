@@ -1,7 +1,0 @@
-Greed is a strategy game: try to eat as much as possible of the board before munching yourself into a corner.
-
-The board is a grid of numbers, and you are the @. When you move in a direction, you erase N squares that way, N being the first number in that direction. Your score is the total number of squares eaten. Greed will not let you move off the grid or over a square you have already eaten, and the game ends when no valid moves are left.
-
-Greed was written by Matt Day, whose last version came out in 1990, and is now maintained by Eric S. Raymond.
-
-Move with h, j, k, l and the diagonals y, u, b, n, or with the arrow keys. Press p to highlight the possible moves and q to quit.

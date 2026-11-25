@@ -1,5 +1,12 @@
+name = "Robots"
+command = "robots"
+displayed = true
+description = """
 The objective of the game is to SURVIVE. You must escape from a bunch of robots, which have been programmed with only a single objective: to kill the player.
 
 Robots comes from the BSD games collection. Every time you move, each robot takes one step towards you. Make them crash into each other and into the junk heaps they leave behind: when the last robot is gone, the next level brings more of them. Teleport when cornered, but you may land right next to one.
 
-Move with h, j, k, l and the diagonals y, u, b, n. Press t to teleport, w to wait until the robots reach you or die, and q to quit.
+- Move with `h` `j` `k` `l` and the diagonals `y` `u` `b` `n`.
+- `t` teleports, `w` waits until the robots reach you or die.
+- `q` quits.
+"""

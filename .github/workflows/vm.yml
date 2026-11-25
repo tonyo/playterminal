@@ -5,10 +5,10 @@ name: VM Image
 on:
   push:
     branches: [master]
-    paths: ["vm/**", "games/games.toml", ".github/workflows/vm.yml"]
+    paths: ["vm/**", "games/library/*.toml", ".github/workflows/vm.yml"]
   pull_request:
     branches: [master]
-    paths: ["vm/**", "games/games.toml", ".github/workflows/vm.yml"]
+    paths: ["vm/**", "games/library/*.toml", ".github/workflows/vm.yml"]
   workflow_dispatch:
 
 permissions:

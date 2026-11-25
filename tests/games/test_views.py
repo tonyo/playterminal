@@ -15,28 +15,49 @@ def test_game_list_shows_only_displayed_games(games, client):
     assert "Tetris" not in content
 
 
-def test_games_file_lists_the_games_on_v86(client):
+def test_library_lists_the_games_by_name(client):
     response = client.get(reverse("game_list"))
 
     shown = [game.name for game in response.context["games"]]
-    assert shown == ["Robots", "NetHack", "Tetris", "Greed", "Hangman"]
+    assert shown == ["Greed", "Hangman", "NetHack", "Robots", "Tetris"]
 
 
-def test_every_game_has_a_description_and_every_description_a_game():
-    slugs = {game.slug for game in catalog.all_games()}
-    files = {path.stem for path in catalog.DESCRIPTIONS_DIR.glob("*.txt")}
-
-    assert files == slugs
-    assert all(game.info for game in catalog.all_games())
-
-
-def test_games_file_has_unique_url_safe_slugs_and_commands():
+def test_library_games_have_url_safe_slugs_commands_and_descriptions():
     games = catalog.all_games()
-    slugs = [game.slug for game in games]
 
-    assert len(set(slugs)) == len(slugs)
-    assert all(re.fullmatch(r"[a-z0-9-]+", slug) for slug in slugs)
-    assert all(game.command for game in games)
+    assert games
+    assert all(re.fullmatch(r"[a-z0-9-]+", game.slug) for game in games)
+    assert all(game.command and game.description for game in games)
+
+
+def test_description_renders_markdown(monkeypatch, client):
+    game = catalog.Game(
+        slug="x", name="X", command="x", description="Press `q` to *quit*.\n\n- one\n- two"
+    )
+    monkeypatch.setattr(catalog, "all_games", lambda: (game,))
+
+    content = client.get("/game/x/").content.decode()
+
+    assert "<p>Press <code>q</code> to <em>quit</em>.</p>" in content
+    assert "<li>one</li>" in content
+
+
+@pytest.mark.parametrize(
+    "markdown, unsafe",
+    [
+        ("<script>alert(1)</script>", "<script>alert"),
+        ('<img src=x onerror="alert(1)">', "<img src=x"),
+        ("[click](javascript:alert(1))", 'href="javascript:'),
+        ("![x](data:text/html;base64,PHNjcmlwdD4=)", 'src="data:text/html'),
+    ],
+)
+def test_description_markdown_is_safe(markdown, unsafe, monkeypatch, client):
+    game = catalog.Game(slug="x", name="X", command="x", description=markdown)
+    monkeypatch.setattr(catalog, "all_games", lambda: (game,))
+
+    content = client.get("/game/x/").content.decode()
+
+    assert unsafe not in content
 
 
 def test_game_detail_has_play_button(game, client):
@@ -58,7 +79,7 @@ def test_unknown_game_is_404(games, client):
 
 def test_game_detail_renders_command_into_js_config(client, settings, monkeypatch):
     settings.V86_BASE_URL = "/vm/"
-    game = catalog.Game(slug="robots", name="Robots", info="", command="robots", refresh_code=12)
+    game = catalog.Game(slug="robots", name="Robots", command="robots", refresh_code=12)
     monkeypatch.setattr(catalog, "all_games", lambda: (game,))
 
     response = client.get(game.get_absolute_url())
@@ -75,7 +96,7 @@ def test_game_detail_renders_command_into_js_config(client, settings, monkeypatc
 
 
 def test_game_detail_escapes_command_in_js_config(client, monkeypatch):
-    game = catalog.Game(slug="x", name="X", info="", command="</script><script>alert(1)")
+    game = catalog.Game(slug="x", name="X", command="</script><script>alert(1)")
     monkeypatch.setattr(catalog, "all_games", lambda: (game,))
 
     content = client.get(game.get_absolute_url()).content.decode()

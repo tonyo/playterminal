@@ -6,9 +6,9 @@
 //     next line;
 //  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
 //     Command gets SIGWINCH;
-//  6. every Game's Command in ../games/games.toml is installed.
+//  6. every Game's Command in ../games/library/*.toml is installed.
 // Exits non-zero on failure.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import url from "node:url";
 import { V86 } from "v86";
@@ -102,11 +102,17 @@ const resized = await launch(
 );
 console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
 
-// The program each Command runs: its first word. games.toml is plain enough that the
-// command lines can be read without a TOML parser.
-const games = readFileSync(path.join(here, "../../games/games.toml"), "utf8");
-const programs = [...games.matchAll(/^command = "(\S+).*"$/gm)].map((m) => m[1]);
-if (programs.length === 0) fail("no Commands found in games.toml");
+// The program each Command runs: its first word. The Game files are plain enough that the
+// command line can be read without a TOML parser.
+const library = path.join(here, "../../games/library");
+const programs = readdirSync(library)
+  .filter((name) => name.endsWith(".toml"))
+  .map((name) => {
+    const m = readFileSync(path.join(library, name), "utf8").match(/^command = "(\S+).*"$/m);
+    if (!m) fail(`no command line in games/library/${name}`);
+    return m[1];
+  });
+if (programs.length === 0) fail("no Games found in games/library");
 const found = await launch(
   `24 80 for p in ${programs.join(" ")}; do command -v $p >/dev/null || echo MISSING $p; done`,
 );

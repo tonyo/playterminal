@@ -1,0 +1,14 @@
+name = "Tetris"
+command = "tetris"
+displayed = true
+description = """
+All-time classic: a famous puzzle game which was ported to nearly every toaster available. Tetriminos FTW!
+
+Move and rotate the falling pieces to fill whole rows, which then disappear. The pieces fall faster with every level, and the game ends when the stack reaches the top.
+
+This is [Micro Tetris](https://github.com/troglobit/tetris) by Joachim Wiberg, based on John Tromp's 1989 entry to the International Obfuscated C Code Contest.
+
+- Move with `j` and `l`, rotate with `k`.
+- `space` drops the piece, `p` pauses.
+- `q` quits.
+"""

@@ -1,7 +1,0 @@
-NetHack is a single-player roguelike video game originally released in 1987 with ASCII graphics. It is a descendant of an earlier game called Hack (1985), which is a descendant of Rogue (1980).
-
-On the surface, the game is a hack'n'slash Dungeons and Dragons clone, but its subtle sense of humor and intellectual rigor elevate it from the faintly nerdy to the sharply geeky.
-
-Explore the Dungeons of Doom, fight its monsters, and retrieve the Amulet of Yendor. Every game is a new dungeon, and a death is final.
-
-Move with h, j, k, l, y, u, b, n. Press ? for help and the full list of commands, and Ctrl-C to quit.

@@ -3,7 +3,7 @@
 from django.db import migrations
 
 
-# The Games moved to games/games.toml.
+# The Games moved to TOML files in games/library/.
 
 
 class Migration(migrations.Migration):

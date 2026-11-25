@@ -17,7 +17,7 @@ Needs [mise](https://mise.jdx.dev) and Docker (the image is built with
 ```sh
 mise run build     # clean build of out/, then `mise run verify`
 mise run verify    # restore the Snapshot in node; check the launcher, `robots`, resizing and
-                   # that every Command in ../games/games.toml is installed
+                   # that every Command in ../games/library/*.toml is installed
 mise run serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
 

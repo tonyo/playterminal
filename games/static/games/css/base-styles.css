@@ -8,9 +8,9 @@ div#sidebar > div {
   font-size: 20px;
 }
 
-/* The Game's description keeps its line breaks. */
-.game-info {
-  white-space: pre-wrap;
+/* The Game's description, rendered from Markdown. */
+.game-info blockquote {
+  font-size: inherit;
 }
 
 /* The ASCII-art logo on the main page. */
