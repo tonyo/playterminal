@@ -114,6 +114,7 @@ def test_licenses_links_the_vm_third_party_list(client, db, settings):
     content = response.content.decode()
     assert 'href="/vm/THIRD-PARTY.txt"' in content
     assert "xterm-6.0.0/LICENSE" in content
+    assert "droid-sans-mono/LICENSE" in content
     assert f'href="{reverse("licenses")}"' in content
 
 
@@ -128,3 +129,10 @@ def test_pages_render(name, url, text, client):
 
     assert response.status_code == 200
     assert text in response.content.decode()
+
+
+def test_pages_load_nothing_from_other_sites(client):
+    content = client.get("/").content.decode()
+
+    assert "googleapis" not in content
+    assert 'src="//' not in content and 'href="//' not in content

@@ -1,3 +1,12 @@
+/* Served from vendor/droid-sans-mono/ (Apache-2.0), not Google Fonts. */
+@font-face {
+  font-family: "Droid Sans Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../vendor/droid-sans-mono/DroidSansMono-latin.woff2") format("woff2");
+}
+
 body div#page-content {
   font-family: "Droid Sans Mono", sans-serif;
 }
