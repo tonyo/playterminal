@@ -1,28 +1,22 @@
-{% extends 'games/base.html' %}
+{% extends "games/base.html" %}
 {% load static %}
-
 {% block head %}
-  <link rel="stylesheet" href="{% static "games/vendor/xterm-6.0.0/xterm.css" %}">
+  <link rel="stylesheet"
+        href="{% static "games/vendor/xterm-6.0.0/xterm.css" %}">
   <link rel="stylesheet" href="{% static "games/css/terminal-styles.css" %}">
-  <script type="text/javascript" src="{% static "games/vendor/xterm-6.0.0/xterm.js" %}" defer></script>
-  <script type="text/javascript" src="{% static "games/js/terminal-window.js" %}" defer></script>
-  <script type="text/javascript" src="{% static "games/js/playterminal.js" %}" defer></script>
+  <script src="{% static "games/vendor/xterm-6.0.0/xterm.js" %}" defer></script>
+  <script src="{% static "games/js/terminal-window.js" %}" defer></script>
+  <script src="{% static "games/js/playterminal.js" %}" defer></script>
 {% endblock %}
-
 {% block content %}
-
   <h1>{{ object.name }}</h1>
-
   <br />
   <div style="white-space: pre-wrap;">{{ object.info }}</div>
-
   <br />
   <button id="open-terminal-btn" class="btn btn-info">Play</button>
-
-  <br /><br />
-  <div id="status-message" class="alert alert-danger" role="alert" hidden>
-  </div>
-
+  <br />
+  <br />
+  <div id="status-message" class="alert alert-danger" role="alert" hidden></div>
   {{ game_config|json_script:"game-config" }}
   <script>
     var gameConfig = JSON.parse(

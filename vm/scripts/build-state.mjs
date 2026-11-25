@@ -25,16 +25,16 @@ console.log("Booting…");
 let serial = "";
 let lastByte = Date.now();
 emulator.add_listener("serial0-output-byte", (byte) => {
-    serial += String.fromCharCode(byte);
-    lastByte = Date.now();
+  serial += String.fromCharCode(byte);
+  lastByte = Date.now();
 });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function until(cond, what) {
-    while (!cond()) {
-        if (Date.now() - t0 > TIMEOUT_MS) throw new Error(`Timed out waiting for ${what}`);
-        await sleep(100);
-    }
+  while (!cond()) {
+    if (Date.now() - t0 > TIMEOUT_MS) throw new Error(`Timed out waiting for ${what}`);
+    await sleep(100);
+  }
 }
 
 await until(() => serial.endsWith(READY), "the launcher on ttyS0");
@@ -45,7 +45,7 @@ console.log(`ttyS0 quiet at the launcher after ${secs()}`);
 
 const state = new Uint8Array(await emulator.save_state());
 const zst = zlib.zstdCompressSync(state, {
-    params: { [zlib.constants.ZSTD_c_compressionLevel]: 19 },
+  params: { [zlib.constants.ZSTD_c_compressionLevel]: 19 },
 });
 fs.writeFileSync(target, zst);
 const kb = (n) => (n / 1024).toFixed(0) + " KiB";

@@ -19,7 +19,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 20px;  /* the window's padding-top; Bootstrap makes this border-box */
+  height: 20px; /* the window's padding-top; Bootstrap makes this border-box */
   padding: 0 6px;
   display: flex;
   align-items: center;
@@ -64,25 +64,55 @@
   height: 14px;
   z-index: 20;
   cursor: nwse-resize;
-  background: linear-gradient(135deg,
-    transparent 0, transparent 55%, #888 55%, #888 62%,
-    transparent 62%, transparent 75%, #888 75%, #888 82%, transparent 82%);
+  background: linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 55%,
+    #888 55%,
+    #888 62%,
+    transparent 62%,
+    transparent 75%,
+    #888 75%,
+    #888 82%,
+    transparent 82%
+  );
 }
 
 .window .grip:hover {
-  background: linear-gradient(135deg,
-    transparent 0, transparent 55%, #fafafa 55%, #fafafa 62%,
-    transparent 62%, transparent 75%, #fafafa 75%, #fafafa 82%, transparent 82%);
+  background: linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 55%,
+    #fafafa 55%,
+    #fafafa 62%,
+    transparent 62%,
+    transparent 75%,
+    #fafafa 75%,
+    #fafafa 82%,
+    transparent 82%
+  );
 }
 
 /* CRT themes: phosphor glow, scanlines and a vignette over the terminal. */
-.window.theme-green { border-color: #1f9940; }
-.window.theme-amber { border-color: #b37a00; }
-.window.theme-green .screen { border-color: #031006; background: #031006; }
-.window.theme-amber .screen { border-color: #120a00; background: #120a00; }
+.window.theme-green {
+  border-color: #1f9940;
+}
+.window.theme-amber {
+  border-color: #b37a00;
+}
+.window.theme-green .screen {
+  border-color: #031006;
+  background: #031006;
+}
+.window.theme-amber .screen {
+  border-color: #120a00;
+  background: #120a00;
+}
 
 .window.crt .xterm-rows {
-  text-shadow: 0 0 3px currentColor, 0 0 8px currentColor;
+  text-shadow:
+    0 0 3px currentColor,
+    0 0 8px currentColor;
 }
 
 .window.crt .screen::after {
@@ -92,9 +122,12 @@
   pointer-events: none;
   z-index: 10;
   background:
-    repeating-linear-gradient(to bottom,
-      rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px,
-      rgba(0, 0, 0, 0.25) 2px, rgba(0, 0, 0, 0.25) 3px),
-    radial-gradient(ellipse at center,
-      rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.45) 100%);
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.25) 2px,
+      rgba(0, 0, 0, 0.25) 3px
+    ),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.45) 100%);
 }

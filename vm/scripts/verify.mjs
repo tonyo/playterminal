@@ -25,27 +25,32 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const emulator = new V86({ ...v86Options(out), initial_state: { url: snapshotUrl(out) } });
 
 let serial = "";
-emulator.add_listener("serial0-output-byte", (b) => { serial += String.fromCharCode(b); });
+emulator.add_listener("serial0-output-byte", (b) => {
+  serial += String.fromCharCode(b);
+});
 
 function fail(msg) {
-    console.error(`FAIL: ${msg}. ttyS0 so far:`, JSON.stringify(serial));
-    process.exit(1);
+  console.error(`FAIL: ${msg}. ttyS0 so far:`, JSON.stringify(serial));
+  process.exit(1);
 }
 async function until(cond, what) {
-    const start = Date.now();
-    while (!cond()) {
-        if (Date.now() - start > TIMEOUT_MS) fail(`timed out waiting for ${what}`);
-        await sleep(50);
-    }
+  const start = Date.now();
+  while (!cond()) {
+    if (Date.now() - start > TIMEOUT_MS) fail(`timed out waiting for ${what}`);
+    await sleep(50);
+  }
 }
 // Send a launch line; resolve with everything up to END once the launcher is READY again.
 async function launch(line, during) {
-    const mark = serial.length;
-    emulator.serial0_send(line + "\n");
-    if (during) await during(mark);
-    await until(() => serial.slice(mark).includes(END + READY), `END and READY after ${JSON.stringify(line)}`);
-    const s = serial.slice(mark);
-    return s.slice(0, s.indexOf(END));
+  const mark = serial.length;
+  emulator.serial0_send(line + "\n");
+  if (during) await during(mark);
+  await until(
+    () => serial.slice(mark).includes(END + READY),
+    `END and READY after ${JSON.stringify(line)}`,
+  );
+  const s = serial.slice(mark);
+  return s.slice(0, s.indexOf(END));
 }
 
 await new Promise((r) => emulator.add_listener("emulator-ready", r));
@@ -60,14 +65,14 @@ if (probe.includes("stty size")) fail("the launch line was echoed");
 if (!probe.endsWith("24 80\r\nTERM=vt100\r\n")) fail("unexpected size or TERM");
 
 const drawn = await launch("24 80 robots", async (mark) => {
-    await until(() => {
-        const s = serial.slice(mark);
-        return s.includes("\x1b[") && s.includes("@") && s.includes("+") && s.length > 500;
-    }, "robots to draw");
-    await sleep(500);
-    console.log(`robots drew ${serial.length - mark} bytes at ${secs()}`);
-    console.log("robots output (head):", JSON.stringify(serial.slice(mark, mark + 300)));
-    emulator.serial0_send("\x03");
+  await until(() => {
+    const s = serial.slice(mark);
+    return s.includes("\x1b[") && s.includes("@") && s.includes("+") && s.length > 500;
+  }, "robots to draw");
+  await sleep(500);
+  console.log(`robots drew ${serial.length - mark} bytes at ${secs()}`);
+  console.log("robots output (head):", JSON.stringify(serial.slice(mark, mark + 300)));
+  emulator.serial0_send("\x03");
 });
 console.log(`Ctrl-C ended robots with END, launcher READY again at ${secs()}`);
 if (drawn.includes("localhost")) fail("a login prompt or motd reached ttyS0");
@@ -76,20 +81,22 @@ if (drawn.includes("localhost")) fail("a login prompt or motd reached ttyS0");
 // launcher must still read the next line.
 await sleep(500);
 const afterEnd = serial.slice(serial.lastIndexOf(END));
-if (afterEnd !== END + READY) fail(`expected one READY after Ctrl-C, got ${JSON.stringify(afterEnd)}`);
+if (afterEnd !== END + READY)
+  fail(`expected one READY after Ctrl-C, got ${JSON.stringify(afterEnd)}`);
 const again = await launch("24 80 echo again");
 if (!again.endsWith("again\r\n")) fail("the launcher did not run the next line after Ctrl-C");
 console.log(`one READY after Ctrl-C, next line runs: ok at ${secs()}`);
 
 // The Command prints its size on SIGWINCH; Ctrl-C ends it.
 const resized = await launch(
-    "24 80 trap 'stty size' WINCH; echo waiting; while :; do sleep 0.2; done",
-    async (mark) => {
-        await until(() => serial.slice(mark).includes("waiting"), "the WINCH probe to start");
-        emulator.serial_send_bytes(1, new TextEncoder().encode("30 100\n"));
-        await until(() => serial.slice(mark).includes("30 100"), "SIGWINCH with the new size");
-        emulator.serial0_send("\x03");
-    });
+  "24 80 trap 'stty size' WINCH; echo waiting; while :; do sleep 0.2; done",
+  async (mark) => {
+    await until(() => serial.slice(mark).includes("waiting"), "the WINCH probe to start");
+    emulator.serial_send_bytes(1, new TextEncoder().encode("30 100\n"));
+    await until(() => serial.slice(mark).includes("30 100"), "SIGWINCH with the new size");
+    emulator.serial0_send("\x03");
+  },
+);
 console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
 
 console.log("PASS");

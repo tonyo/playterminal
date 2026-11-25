@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.css",
+      "!games/static/games/vendor",
+      "!**/*.min.js",
+      "!**/*.min.css",
+      "!vm/out",
+      "!vm/node_modules"
+    ]
+  },
+  "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
+  "linter": { "rules": { "preset": "recommended" } },
+  "javascript": {
+    "formatter": { "quoteStyle": "single" },
+    "globals": ["jQuery", "$", "Terminal", "TerminalWindow", "gameConfig", "V86"]
+  },
+  "overrides": [
+    {
+      "includes": ["vm/**"],
+      "javascript": { "formatter": { "quoteStyle": "double" } }
+    }
+  ]
+}

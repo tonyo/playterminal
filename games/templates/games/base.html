@@ -1,59 +1,51 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html>
-<head lang="en">
-  <meta charset="UTF-8">
-  <meta name="description" content="PlayTerminal: play terminal-based games right in your browser.">
-  <meta name="keywords" content="PlayTerminal,Docker,Games,Terminal,ASCII">
-  <meta name="author" content="Anton Ovchinnikov">
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans+Mono">
-  <link rel="stylesheet" href="{% static "games/css/bootstrap.min.css" %}">
-  <link rel="stylesheet" href="{% static "games/css/base-styles.css" %}">
-
-  <!-- JS -->
-  <script type="text/javascript" src="{% static "games/js/jquery-2.1.4.min.js" %}" defer></script>
-  {% block head %}{% endblock %}
-
-  <title>PlayTerminal</title>
-</head>
-<body>
-
-<div id="page-content" class="container">
-  <br />
-  <div class="col-md-3">
-    <a href="{% url 'game_list' %}">
-      <img src="{% static "games/img/play_logo.png" %}" width="250" alt="PlayTerminal logo">
-    </a>
-    <br />
-    <br />
-
-    <div id="sidebar">
-      <div>
-        <a href="{% url 'main' %}">Page zero</a>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <meta name="description"
+          content="PlayTerminal: play terminal-based games right in your browser.">
+    <meta name="keywords" content="PlayTerminal,Docker,Games,Terminal,ASCII">
+    <meta name="author" content="Anton Ovchinnikov">
+    <!-- Stylesheets -->
+    <link rel="stylesheet"
+          href="//fonts.googleapis.com/css?family=Droid+Sans+Mono">
+    <link rel="stylesheet" href="{% static "games/css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "games/css/base-styles.css" %}">
+    <!-- JS -->
+    <script src="{% static "games/js/jquery-2.1.4.min.js" %}" defer></script>
+    {% block head %}{% endblock %}
+    <title>PlayTerminal</title>
+  </head>
+  <body>
+    <div id="page-content" class="container">
+      <br />
+      <div class="col-md-3">
+        <a href="{% url 'game_list' %}">
+          <img src="{% static "games/img/play_logo.png" %}"
+               width="250"
+               alt="PlayTerminal logo">
+        </a>
+        <br />
+        <br />
+        <div id="sidebar">
+          <div>
+            <a href="{% url 'main' %}">Page zero</a>
+          </div>
+          <div>
+            <a href="{% url 'game_list' %}">Games</a>
+          </div>
+          <div>
+            <a href="{% url 'about' %}">About</a>
+          </div>
+          <div>
+            <a href="{% url 'licenses' %}">Licenses</a>
+          </div>
+        </div>
       </div>
-
-      <div>
-        <a href="{% url 'game_list' %}">Games</a>
-      </div>
-
-      <div>
-        <a href="{% url 'about' %}">About</a>
-      </div>
-
-      <div>
-        <a href="{% url 'licenses' %}">Licenses</a>
+      <div class="col-md-8">
+        {% block content %}{% endblock %}
       </div>
     </div>
-
-  </div>
-
-  <div class="col-md-8">
-    {% block content %}{% endblock %}
-  </div>
-</div>
-
-</body>
+  </body>
 </html>

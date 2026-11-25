@@ -1,9 +1,9 @@
 body div#page-content {
-    font-family: 'Droid Sans Mono', sans-serif;
+  font-family: "Droid Sans Mono", sans-serif;
 }
 
 div#sidebar > div {
-    padding: 20px;
-    padding-left: 40px;
-    font-size: 20px;
+  padding: 20px;
+  padding-left: 40px;
+  font-size: 20px;
 }
