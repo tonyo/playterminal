@@ -17,9 +17,10 @@ repos:
       - id: check-merge-conflict
       # Vendored files stay byte-for-byte as upstream ships them.
       - id: trailing-whitespace
-        exclude: &vendored ^games/static/games/(vendor/|.*\.min\.(js|css)$)
+        # Patches keep the space that marks a blank context line.
+        exclude: ^games/static/games/(vendor/|.*\.min\.(js|css)$)|\.patch$
       - id: end-of-file-fixer
-        exclude: *vendored
+        exclude: ^games/static/games/(vendor/|.*\.min\.(js|css)$)
 
   # JS and CSS: lint, then format (config in biome.jsonc). Runs on the node from mise.toml.
   - repo: https://github.com/biomejs/pre-commit

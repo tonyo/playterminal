@@ -6,7 +6,8 @@
 //     next line;
 //  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
 //     Command gets SIGWINCH;
-//  6. every Game's Command in ../games/library/*.toml is installed.
+//  6. every Game's Command in ../games/library/*.toml is installed;
+//  7. tetris keeps drawing with no input: its drop timer fires, so the pieces fall.
 // Exits non-zero on failure.
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -118,6 +119,16 @@ const found = await launch(
 );
 if (found.includes("MISSING")) fail(`Commands not in the VM Image: ${JSON.stringify(found)}`);
 console.log(`every Game's Command is installed (${programs.join(", ")}): ok at ${secs()}`);
+
+// Micro Tetris drops pieces from a SIGALRM timer (see image/micro-tetris-timer.patch).
+await launch("24 80 tetris", async (mark) => {
+  await until(() => serial.slice(mark).includes("quit"), "tetris to draw");
+  await sleep(500);
+  const drawn = serial.length;
+  await until(() => serial.length > drawn + 50, "a tetris piece to fall with no input");
+  emulator.serial0_send("\x03");
+});
+console.log(`tetris pieces fall on their own: ok at ${secs()}`);
 
 console.log("PASS");
 emulator.destroy();

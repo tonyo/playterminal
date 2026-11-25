@@ -1,0 +1,26 @@
+Micro Tetris keeps its timer in a long[4] cast to struct itimerval. That only fits
+where time_t and long are both 64-bit: on i386 musl (64-bit time_t) the timer is
+never armed and the pieces don't fall. Use a real struct itimerval. Upstream 1.5.0
+has the same code.
+
+--- a/tetris.c
++++ b/tetris.c
+@@ -292,14 +292,14 @@
+ 
+ void alarm_handler(int signo)
+ {
+-	static long h[4];
++	static struct itimerval t;
+ 
+ 	/* On init from main() */
+ 	if (!signo)
+-		h[3] = 500000;
++		t.it_value.tv_usec = 500000;
+ 
+-	h[3] -= h[3] / (3000 - 10 * level);
+-	setitimer(0, (struct itimerval *)h, 0);
++	t.it_value.tv_usec -= t.it_value.tv_usec / (3000 - 10 * level);
++	setitimer(ITIMER_REAL, &t, 0);
+ }
+ 
+ void exit_handler(int signo)

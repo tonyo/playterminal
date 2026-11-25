@@ -16,6 +16,8 @@ SEABIOS = "rel-1.16.2"
 APORTS = "https://gitlab.alpinelinux.org/alpine/aports/-/tree"
 # Built from source by image/Dockerfile; keep in step with its GREED_COMMIT.
 GREED_COMMIT = "79799d1ba4b1bbc30c13d2b6725ab5ce5dbc5c32"
+# Also built by image/Dockerfile, with image/micro-tetris-timer.patch.
+TETRIS = "1.4.0"
 
 
 def installed_packages(tar_path):
@@ -39,6 +41,7 @@ def read_member(tar_path, name):
 def main(tar_path, v86_license_path, out_path):
     packages = installed_packages(tar_path)
     greed_license = read_member(tar_path, "usr/share/licenses/greed/COPYING")
+    tetris_license = read_member(tar_path, "usr/share/licenses/micro-tetris/LICENSE")
     with open(v86_license_path) as f:
         v86_license = f.read().strip()
 
@@ -98,6 +101,13 @@ def main(tar_path, v86_license_path, out_path):
         f"Source: https://gitlab.com/esr/greed/-/tree/{GREED_COMMIT}",
         "",
         greed_license,
+        "",
+        f"Micro Tetris {TETRIS} (/usr/bin/tetris), by Joachim Wiberg and John Tromp",
+        "License: ISC",
+        f"Source: https://github.com/troglobit/tetris/tree/{TETRIS}, with a fix for the",
+        "drop timer on i386: image/micro-tetris-timer.patch in the repository below",
+        "",
+        tetris_license,
         "",
         "",
         "5. PlayTerminal's own files in the image",

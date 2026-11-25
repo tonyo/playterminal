@@ -45,8 +45,10 @@ const emulator = new V86({ ...v86Options("./out/"), initial_state: { url: snapsh
 ## Sources
 
 - `image/Dockerfile`: v86's `tools/docker/alpine/Dockerfile` with the games instead of nodejs
-  (Alpine's `bsd-games`, `nethack`, `micro-tetris` and `words-en`, plus Greed 4.5 built from
-  [source](https://gitlab.com/esr/greed) in a separate stage), a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell,
+  (Alpine's `bsd-games`, `nethack` and `words-en`, plus Greed 4.5 built from
+  [source](https://gitlab.com/esr/greed) and Micro Tetris 1.4.0 built from
+  [source](https://github.com/troglobit/tetris) with `image/micro-tetris-timer.patch`, each in
+  its own stage), a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell,
   and `image/playterminal-resize` on ttyS1, which sets ttyS0's size.
 - The BIOS files and v86's `fs2json.py` / `copy-to-sha256.py` are downloaded from
   [copy/v86](https://github.com/copy/v86) (BSD-2-Clause) at commit `315b2b0`, the source of

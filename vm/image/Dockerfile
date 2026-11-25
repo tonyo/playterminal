@@ -11,15 +11,31 @@ RUN git clone --depth 1 --branch 4.5 https://gitlab.com/esr/greed.git /src \
     && test "$(git -C /src rev-parse HEAD)" = "$GREED_COMMIT" \
     && make -C /src greed
 
+# Alpine's micro-tetris package has a timer bug on i386 (see micro-tetris-timer.patch):
+# build the same release, 1.4.0, with the fix in its own stage.
+FROM docker.io/i386/alpine:3.21.0 AS tetris
+ARG TETRIS_SHA512=034e85028ab71e050de14775da2538ed6f2e27db9ae095c32982d5d32effdf17643f68cb43d72ef176855c909f264e45b9b6ae05c39bfd240ae08277f4523c78
+RUN apk add build-base
+COPY micro-tetris-timer.patch /
+RUN wget -O /tetris.tar.gz https://github.com/troglobit/tetris/archive/1.4.0.tar.gz \
+    && echo "$TETRIS_SHA512  /tetris.tar.gz" | sha512sum -c \
+    && mkdir /src && tar -xzf /tetris.tar.gz -C /src --strip-components=1 \
+    && patch -d /src -p1 < /micro-tetris-timer.patch \
+    && make -C /src tetris
+
 FROM docker.io/i386/alpine:3.21.0
 
 ENV KERNEL=virt
-# bsd-games: robots and hangman; words-en: hangman's word list; micro-tetris: tetris.
-ENV ADDPKGS="bsd-games nethack micro-tetris words-en ncurses-libs ncurses-terminfo-base"
+# bsd-games: robots and hangman; words-en: hangman's word list.
+ENV ADDPKGS="bsd-games nethack words-en ncurses-libs ncurses-terminfo-base"
 
 RUN apk add openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 COPY --from=greed /src/greed /usr/bin/greed
 COPY --from=greed /src/COPYING /usr/share/licenses/greed/COPYING
+COPY --from=tetris /src/tetris /usr/bin/tetris
+COPY --from=tetris /src/LICENSE /usr/share/licenses/micro-tetris/LICENSE
+# Its high score list (Alpine's package ships it the same way).
+RUN install -D -m 0664 /dev/null /var/games/tetris.scores
 
 RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
 # ttyS0 carries the Games: the launcher reads "<rows> <cols> <command>" lines.
