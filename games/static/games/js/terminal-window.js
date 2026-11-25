@@ -184,9 +184,9 @@ TerminalWindow.prototype.open = function() {
   var close = $('<div class="tab" title="Close terminal">✖</div>')
     .on('click', function() { self.close(); });
   this.zoomOutTab = $('<div class="tab" title="Smaller text">−</div>')
-    .on('click', function() { self.zoom(-1); });
+    .on('click', function() { self.zoom(-1, this); });
   this.zoomInTab = $('<div class="tab" title="Larger text">+</div>')
-    .on('click', function() { self.zoom(1); });
+    .on('click', function() { self.zoom(1, this); });
   this.themeTab = $('<div class="tab">◐</div>')
     .on('click', function() { self.nextTheme(); });
   var bar = $('<div class="bar">')
@@ -236,12 +236,16 @@ TerminalWindow.prototype.setFontSize = function(size) {
   this.zoomInTab.toggleClass('disabled', i === FONT_SIZES.length - 1);
 };
 
-// Step the font size; the terminal keeps its rows and columns.
-TerminalWindow.prototype.zoom = function(step) {
+// Step the font size; the terminal keeps its rows and columns. The window grows or
+// shrinks, so move it to keep the clicked button under the pointer for the next click.
+TerminalWindow.prototype.zoom = function(step, tab) {
   var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step;
   if (i >= 0 && i < FONT_SIZES.length) {
+    var before = tab.getBoundingClientRect().left;
     this.setFontSize(FONT_SIZES[i]);
     saveFontSize(FONT_SIZES[i]);
+    var left = this.element.position().left + before - tab.getBoundingClientRect().left;
+    this.element.css('left', Math.max(0, left));  // but keep the window on the page
   }
   this.term.focus();
 };
