@@ -14,7 +14,6 @@ node = "24.22.3"
 
 [env]
 _.python.venv = { path = ".venv", create = true }
-COMPOSE_FILE = "docker-compose.yaml:compose.local.yaml"
 # The static site (site/) is built with Astro; don't send Astro usage telemetry.
 ASTRO_TELEMETRY_DISABLED = "1"
 
@@ -65,18 +64,26 @@ depends = ["site:build"]
 dir = "site"
 run = "node --test"
 
+[tasks.image]
+description = "Build the whole image, tonyo/playterminal: VM Image, Snapshot (verified), site, nginx"
+run = "docker buildx bake -f docker-bake.hcl"
+
 [tasks.up]
-description = "Build and start the local stack on http://localhost:8090, then migrate and collect static files"
+description = "Build the image and serve it on http://localhost:8090"
+depends = ["image"]
 run = """
 set -eu
-docker compose up -d --build
-docker compose exec -T playterminal-server sh -c \
-  "python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear"
+docker rm -f playterminal-local >/dev/null 2>&1 || true
+docker run -d --name playterminal-local -p 127.0.0.1:${PLAYTERMINAL_PORT:-8090}:80 tonyo/playterminal
 """
 
+[tasks.smoke]
+description = "Check the running container (mise run up) over HTTP"
+run = "scripts/smoke-test.sh http://localhost:${PLAYTERMINAL_PORT:-8090}"
+
 [tasks.down]
-description = "Stop the local stack"
-run = "docker compose down"
+description = "Stop the local container"
+run = "docker rm -f playterminal-local"
 
 [tasks.clean]
 description = "Delete compiled Python files"

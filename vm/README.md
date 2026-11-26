@@ -11,18 +11,29 @@ under the MIT license ([LICENSE](../LICENSE)).
 
 ## Build
 
-Needs [mise](https://mise.jdx.dev) and Docker (the image is built with
-`--platform linux/386`).
+Needs [mise](https://mise.jdx.dev) and Docker with buildx. The build runs in Docker: the
+`vm-*` stages of the root [`Dockerfile`](../Dockerfile), wired up by
+[`docker-bake.hcl`](../docker-bake.hcl). The same stages go into the site's image, so the
+image always carries a verified VM build.
 
 ```sh
-mise run build     # clean build of out/, then `mise run verify`
-mise run verify    # restore the Snapshot in node; check the launcher, `robots`, resizing and
-                   # that every Command in ../games/library/*.toml is installed
+mise run build     # build and verify in Docker, then write the result to out/
+mise run verify    # restore out/'s Snapshot in node; check the launcher, `robots`, resizing
+                   # and that every Command in ../games/library/*.toml is installed
 mise run serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
 
-CI (`.github/workflows/vm.yml`) runs `mise run build` whenever `vm/` changes and keeps
-`out/` as the `vm-out` artifact for 14 days.
+The stages, in order:
+
+| Stage | What |
+|---|---|
+| `guest` (`image/Dockerfile`, linux/386) | the VM Image: Alpine, the Games, the launcher |
+| `vm-image` | tars the guest's files and runs `scripts/convert-image.sh`: `fs.json`, `rootfs-flat/`, `THIRD-PARTY.txt` |
+| `vm-state` | `scripts/build-state.mjs` cold-boots it in node and saves the Snapshot; `scripts/stamp.mjs` names files by hash |
+| `vm-verify` | `scripts/verify.mjs` (also `mise run verify`) |
+
+Only `vm-verify` reads the Games, so editing a Game's TOML doesn't rebuild the Snapshot. CI
+builds the whole image on every push, with the stages cached.
 
 ## Output (`out/`)
 
@@ -52,4 +63,4 @@ const emulator = new V86({ ...v86Options("./out/"), initial_state: { url: snapsh
   and `image/playterminal-resize` on ttyS1, which sets ttyS0's size.
 - The BIOS files and v86's `fs2json.py` / `copy-to-sha256.py` are downloaded from
   [copy/v86](https://github.com/copy/v86) (BSD-2-Clause) at commit `315b2b0`, the source of
-  npm `v86@0.5.473`, and checked against pinned sha256 sums (`scripts/fetch-upstream.sh`).
+  npm `v86@0.5.473`, and checked against pinned sha256 sums (`ADD --checksum` in the root `Dockerfile`).

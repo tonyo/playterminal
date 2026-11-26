@@ -1,27 +1,9 @@
+# Production: one nginx container serving the whole site. Build and push the image with
+# `docker buildx bake` (docker-bake.hcl); `mise run up` runs it locally.
 services:
-  playterminal-nginx:
-    image: tonyo/playterminal-nginx
+  playterminal:
+    image: tonyo/playterminal
     pull_policy: always
-    build: ./nginx
     x-ports:
       - playtermin.al:80/https
-    volumes:
-      - static-volume:/app/playterminal/collected_static/
     restart: always
-
-  playterminal-server:
-    image: tonyo/playterminal-server
-    pull_policy: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - static-volume:/app/playterminal/collected_static/
-      - db-data:/app/data
-    env_file:
-      - .env.local
-    restart: always
-
-volumes:
-  static-volume:
-  db-data:

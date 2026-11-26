@@ -35,23 +35,26 @@ jobs:
       - name: Build and test the site
         run: mise run site:test
 
-  # Builds both images without pushing, to catch a broken Dockerfile or uv.lock.
-  docker:
+  # The whole image (docker-bake.hcl): VM Image, Snapshot and its verify, site build and
+  # tests, nginx. Not pushed. The VM stages come from the gha cache unless vm/ changed.
+  image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - name: Build the server image
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      - name: Build the image
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
         with:
-          context: .
-          push: false
-          cache-from: type=gha,scope=server
-          cache-to: type=gha,scope=server,mode=max
-      - name: Build the nginx image
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: nginx
-          push: false
-          cache-from: type=gha,scope=nginx
-          cache-to: type=gha,scope=nginx,mode=max
+          source: .
+          files: docker-bake.hcl
+          load: true
+          # One cache scope per target, or they overwrite each other's.
+          set: |
+            guest.cache-from=type=gha,scope=guest
+            guest.cache-to=type=gha,scope=guest,mode=max
+            playterminal.cache-from=type=gha,scope=playterminal
+            playterminal.cache-to=type=gha,scope=playterminal,mode=max
+      - name: Smoke test the container
+        run: |
+          docker run -d --name playterminal -p 8090:80 tonyo/playterminal
+          scripts/smoke-test.sh http://localhost:8090

@@ -10,55 +10,37 @@ on an Alpine Linux VM Image built in [`vm/`](vm/README.md).
 
 ### Getting started
 
-Dependencies: Docker and [mise](https://mise.jdx.dev). The app runs on
-Python 3.14 and Django 5.2 LTS.
+Dependencies: Docker (with buildx) and [mise](https://mise.jdx.dev).
+`mise tasks` lists the tasks.
 
-mise installs Python and [uv](https://docs.astral.sh/uv/) (`mise.toml`,
-locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
-(`pyproject.toml`, locked in `uv.lock`). `mise tasks` lists the tasks.
+The site is static: [`site/`](site/README.md) is an Astro project that
+renders every page at build time from the Games, one TOML file per Game in
+`games/library/` (see its README). Play runs the Game's Command in v86 inside
+the browser: nothing runs on the server. The whole site ships as one nginx
+image, `tonyo/playterminal`, built by `Dockerfile` and `docker-bake.hcl`:
+the VM Image and Snapshot (built from `vm/` and verified in the build), the
+site (built and tested in the build), and the nginx config in
+`nginx/site.conf`.
 
 1. Run `mise install && mise run setup`: it installs the tools, the
-   dependencies and the git pre-commit hooks: ruff for Python, Biome for
-   the JS and CSS (`biome.jsonc`), djLint for the Django templates
-   (`[tool.djlint]` in `pyproject.toml`), and file checks.
+   dependencies and the git pre-commit hooks (Biome for the JS and CSS in
+   `biome.jsonc`, ruff, djLint, file checks).
 
-2. Create `.env.local` (gitignored):
+2. Build the image and serve it on http://localhost:8090: `mise run up`
+   (the first build takes a few minutes; later ones reuse the Docker cache).
+   `mise run smoke` checks it over HTTP, `mise run down` stops it.
 
-   ```
-   SECRET_KEY=<a long random string>
-   CSRF_TRUSTED_ORIGINS=http://localhost:8090
-   ```
+3. Work on the pages with live reload: `mise run site:dev`. It serves the
+   VM files from `vm/out/`; build them once with `cd vm && mise run build`.
 
-   `CSRF_TRUSTED_ORIGINS` is only needed when the site is served on a
-   non-default port, as in the local run below.
+4. Run the tests: `mise run site:test` (the site) and `mise run test`. Run
+   every pre-commit hook on all files: `mise run lint`.
 
-3. Build the VM Image and Snapshot: `cd vm && mise run build` (needs Node
-   and Docker; see [vm/README.md](vm/README.md)). `compose.local.yaml`
-   mounts `vm/out/` into nginx at `/v86/`; set `V86_OUT` to serve another
-   output directory.
+Deploy: `docker buildx bake` builds `tonyo/playterminal`; push it, and the
+server runs it with `docker-compose.yaml`.
 
-4. Build and start it on http://localhost:8090. `mise run up` builds the
-   images, starts the stack, migrates and collects static files. Run it again
-   after any change.
-
-   ```
-   mise run up
-   docker compose exec playterminal-server python manage.py createsuperuser
-   ```
-
-   mise sets `COMPOSE_FILE` to include `compose.local.yaml`, so plain
-   `docker compose` commands run against the local stack. `mise run down`
-   stops it.
-
-   The pages are templates in `games/templates/games/` (being replaced by
-   the static Astro site in [`site/`](site/README.md)), and each Game is a
-   TOML file in `games/library/` (see its README): nothing to load into the
-   database. Play runs the Game's Command in v86
-   inside the browser: nothing runs on the server.
-
-5. Run the tests: `mise run test`. Run every pre-commit hook on all files,
-   which also formats the JS, CSS and templates: `mise run lint`; format the
-   Python code: `mise run format`.
+The Django app (`games/`, `playterminal/`, `manage.py`) is no longer built
+or deployed, and will be removed.
 
 Dependency updates: change `pyproject.toml` if needed, then run `uv lock`
 (or `uv lock --upgrade`). Both uv (`exclude-newer`) and mise
