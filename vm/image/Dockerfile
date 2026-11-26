@@ -26,7 +26,7 @@ RUN wget -O /tetris.tar.gz https://github.com/troglobit/tetris/archive/1.4.0.tar
 FROM docker.io/i386/alpine:3.21.0
 
 ENV KERNEL=virt
-# bsd-games: robots and hangman; words-en: hangman's word list.
+# bsd-games: adventure, robots and hangman; words-en: hangman's word list.
 ENV ADDPKGS="bsd-games nethack words-en ncurses-libs ncurses-terminfo-base"
 
 RUN apk add openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS

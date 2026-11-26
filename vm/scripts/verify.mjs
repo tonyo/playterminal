@@ -7,7 +7,8 @@
 //  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
 //     Command gets SIGWINCH;
 //  6. every Game's Command in ../games/library/*.toml is installed;
-//  7. tetris keeps drawing with no input: its drop timer fires, so the pieces fall.
+//  7. tetris keeps drawing with no input: its drop timer fires, so the pieces fall;
+//  8. Ctrl-D does not make adventure loop on end of input.
 // Exits non-zero on failure.
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -103,13 +104,15 @@ const resized = await launch(
 );
 console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
 
-// The program each Command runs: its first word. The Game files are plain enough that the
-// command line can be read without a TOML parser.
+// The program each Command runs: its first word, after any stty setup. The Game files are
+// plain enough that the command line can be read without a TOML parser.
 const library = path.join(here, "../../games/library");
 const programs = readdirSync(library)
   .filter((name) => name.endsWith(".toml"))
   .map((name) => {
-    const m = readFileSync(path.join(library, name), "utf8").match(/^command = "(\S+).*"$/m);
+    const m = readFileSync(path.join(library, name), "utf8").match(
+      /^command = "(?:stty [^;"]*; )?([^\s";]+)[^"]*"/m,
+    );
     if (!m) fail(`no command line in games/library/${name}`);
     return m[1];
   });
@@ -129,6 +132,19 @@ await launch("24 80 tetris", async (mark) => {
   emulator.serial0_send("\x03");
 });
 console.log(`tetris pieces fall on their own: ok at ${secs()}`);
+
+// At end of input adventure loops forever, so its Command makes Ctrl-D an ordinary key.
+const adventure = readFileSync(path.join(library, "adventure.toml"), "utf8");
+await launch(`24 80 ${adventure.match(/^command = "([^"]*)"/m)[1]}`, async (mark) => {
+  await until(() => serial.slice(mark).includes("down a gully"), "adventure to start");
+  await sleep(500);
+  const started = serial.length;
+  emulator.serial0_send("\x04");
+  await sleep(2000);
+  if (serial.length - started > 200) fail("adventure loops after Ctrl-D");
+  emulator.serial0_send("\x03");
+});
+console.log(`Ctrl-D does not make adventure loop: ok at ${secs()}`);
 
 console.log("PASS");
 emulator.destroy();

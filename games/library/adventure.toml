@@ -1,0 +1,13 @@
+name = "Adventure"
+command = "stty eof undef; adventure"  # at end of input, adventure loops forever
+displayed = true
+description = """
+Colossal Cave Adventure is the original text adventure. Will Crowther wrote it in the mid-1970s, drawing on their caving in Kentucky, and Don Woods expanded it in 1977. This version comes from the BSD games collection.
+
+Somewhere nearby is a cave where others have found fortunes in treasure and gold, though some who enter are never seen again. Explore it, find the treasures and bring them back to the building.
+
+- Give commands of one or two words, such as `enter building`, `take lamp` or `west`, then press `Enter`.
+- Only the first five letters of a word count: type `ne` for northeast.
+- `help` and `info` explain more, `inventory` lists what you carry.
+- `quit` or `Ctrl-C` quits. Your progress is lost when you close the window.
+"""

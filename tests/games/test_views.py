@@ -19,7 +19,7 @@ def test_library_lists_the_games_by_name(client):
     response = client.get(reverse("game_list"))
 
     shown = [game.name for game in response.context["games"]]
-    assert shown == ["Greed", "Hangman", "NetHack", "Robots", "Tetris"]
+    assert shown == ["Adventure", "Greed", "Hangman", "NetHack", "Robots", "Tetris"]
 
 
 def test_library_games_have_url_safe_slugs_commands_and_descriptions():
