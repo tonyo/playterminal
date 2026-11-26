@@ -93,6 +93,23 @@
   );
 }
 
+/* Maximized: pinned to the viewport's corner, the rest of the page blacked out
+   (the viewport is rarely a whole number of cells). */
+.window.maximized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 0 0 0 100vmax #000;
+}
+
+.window.maximized .bar {
+  cursor: default;
+}
+
+.window.maximized .grip {
+  display: none;
+}
+
 /* CRT themes: phosphor glow, scanlines and a vignette over the terminal. */
 .window.theme-green {
   border-color: #1f9940;
@@ -113,6 +130,11 @@
   text-shadow:
     0 0 3px currentColor,
     0 0 8px currentColor;
+}
+
+/* The same glow on the WebGL renderer's canvas (addGlowFilter in terminal-window.js). */
+.window.crt .xterm-screen canvas:not(.xterm-link-layer) {
+  filter: url(#crt-glow);
 }
 
 .window.crt .screen::after {

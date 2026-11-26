@@ -115,6 +115,7 @@ def test_licenses_links_the_vm_third_party_list(client, db, settings):
     content = response.content.decode()
     assert 'href="/vm/THIRD-PARTY.txt"' in content
     assert "xterm-6.0.0/LICENSE" in content
+    assert "xterm-addon-webgl-0.19.0/LICENSE" in content
     assert "droid-sans-mono/LICENSE" in content
     assert f'href="{reverse("licenses")}"' in content
 

@@ -15,7 +15,13 @@
  *
  * The corner grip resizes the terminal in whole cells. The window sends the
  * new size as "<rows> <cols>" on serial1, where the guest sets ttyS0's size
- * and the Game gets SIGWINCH (vm/image/playterminal-resize).
+ * and the Game gets SIGWINCH (vm/image/playterminal-resize). □ (or a
+ * double-click on the bar) maximizes the window to fill the browser's viewport,
+ * and ❐ puts it back. Not the Fullscreen API: there Esc leaves fullscreen, and
+ * many Games need Esc.
+ *
+ * The terminal draws with WebGL when the browser can (xterm.js's WebGL addon),
+ * which keeps up with full-screen redraws better than the default DOM renderer.
  *
  * Each emulator runs in its own hidden iframe, removed on close. With several
  * V86 instances created one after another in one page (v86 0.5.473), each
@@ -126,6 +132,22 @@
     } catch {}
   }
 
+  // The CRT themes' glow on the WebGL renderer's canvas, where CSS text-shadow
+  // does not reach: the picture with two blurred copies of itself screened on top.
+  function addGlowFilter() {
+    if (document.getElementById('crt-glow')) return;
+    var holder = document.createElement('div');
+    holder.innerHTML =
+      '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' +
+      '<filter id="crt-glow" color-interpolation-filters="sRGB">' +
+      '<feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="near"/>' +
+      '<feGaussianBlur in="SourceGraphic" stdDeviation="4" result="far"/>' +
+      '<feBlend in="near" in2="far" mode="screen" result="glow"/>' +
+      '<feBlend in="SourceGraphic" in2="glow" mode="screen"/>' +
+      '</filter></svg>';
+    document.body.appendChild(holder.firstChild);
+  }
+
   // A hidden iframe with libv86.js loaded; resolves to the iframe.
   function createFrame(base) {
     return new Promise(function (resolve, reject) {
@@ -184,7 +206,9 @@
     this.rows = ROWS;
     this.cols = COLS;
     this.theme = null;
-    this.themeTab = this.zoomInTab = this.zoomOutTab = null;
+    this.themeTab = this.zoomInTab = this.zoomOutTab = this.maximizeTab = null;
+    this.unmaximized = null; // the position and size to go back to, while maximized
+    this.onViewportResize = this.fitViewport.bind(this);
     this.closed = false;
     this.launched = false; // a Command is running
     this.tail = ''; // the last bytes from ttyS0, to spot END and READY
@@ -245,13 +269,20 @@
     this.themeTab = tab('◐', '', function () {
       self.nextTheme();
     });
+    this.maximizeTab = tab('□', 'Maximize', function () {
+      self.toggleMaximize();
+    });
     var bar = div('bar', [
       close,
       div('title', this.options.name),
       this.zoomOutTab,
       this.zoomInTab,
       this.themeTab,
+      this.maximizeTab,
     ]);
+    bar.addEventListener('dblclick', function (ev) {
+      if (!ev.target.classList.contains('tab')) self.toggleMaximize();
+    });
     var screen = div('screen');
     var grip = div('grip');
     grip.title = 'Resize';
@@ -265,12 +296,35 @@
       return self.term;
     }
     this.emulator.set_serial_container_xtermjs(screen, Terminal);
+    this.useWebgl();
     this.setTheme(savedTheme());
     this.setFontSize(savedFontSize());
     this.term.focus();
 
     this.launch();
     (this.options.onOpen || noop)();
+  };
+
+  // Draw with WebGL if the browser can; if not, or if the GPU later drops the
+  // context, xterm.js keeps or goes back to its DOM renderer.
+  TerminalWindow.prototype.useWebgl = function () {
+    var addon;
+    if (!window.WebglAddon) {
+      console.log('TerminalWindow: the WebGL addon did not load, using the DOM renderer');
+      return;
+    }
+    try {
+      addon = new window.WebglAddon.WebglAddon();
+      addon.onContextLoss(function () {
+        console.log('TerminalWindow: lost the WebGL context, using the DOM renderer');
+        addon.dispose();
+      });
+      this.term.loadAddon(addon);
+      addGlowFilter();
+      console.log('TerminalWindow: using the WebGL renderer');
+    } catch (err) {
+      console.log('TerminalWindow: no WebGL, using the DOM renderer', err);
+    }
   };
 
   TerminalWindow.prototype.setTheme = function (theme) {
@@ -301,11 +355,16 @@
 
   // Step the font size; the terminal keeps its rows and columns. The window grows or
   // shrinks, so move it to keep the clicked button under the pointer for the next click.
+  // A maximized window instead keeps filling the viewport, with more or fewer cells.
   TerminalWindow.prototype.zoom = function (step, tab) {
     var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step,
       before,
       left;
-    if (i >= 0 && i < FONT_SIZES.length) {
+    if (i >= 0 && i < FONT_SIZES.length && this.unmaximized) {
+      this.setFontSize(FONT_SIZES[i]);
+      saveFontSize(FONT_SIZES[i]);
+      this.fitViewport();
+    } else if (i >= 0 && i < FONT_SIZES.length) {
       before = tab.getBoundingClientRect().left;
       this.setFontSize(FONT_SIZES[i]);
       saveFontSize(FONT_SIZES[i]);
@@ -320,7 +379,7 @@
     var self = this,
       el = this.element;
     bar.addEventListener('mousedown', function (ev) {
-      if (ev.target.classList.contains('tab')) return;
+      if (ev.target.classList.contains('tab') || self.unmaximized) return;
       ev.preventDefault();
       var start = { left: el.offsetLeft, top: el.offsetTop },
         x = ev.pageX,
@@ -338,13 +397,12 @@
     var self = this;
     grip.addEventListener('mousedown', function (ev) {
       ev.preventDefault();
-      var cells = self.element.querySelector('.xterm-screen').getBoundingClientRect(),
-        frame = self.element.getBoundingClientRect(),
-        cellWidth = cells.width / self.cols,
-        cellHeight = cells.height / self.rows,
+      var m = self.metrics(),
+        frame = m.frame,
+        cellWidth = m.cellWidth,
+        cellHeight = m.cellHeight,
+        spare = m.spare,
         start = { cols: self.cols, rows: self.rows, x: ev.pageX, y: ev.pageY },
-        // room for the window's frame around the cells
-        spare = { x: frame.width - cells.width, y: frame.height - cells.height },
         maxCols = Math.max(
           COLS,
           Math.floor(
@@ -366,6 +424,55 @@
         );
       });
     });
+  };
+
+  // The window's box, a cell's size, and the room the frame takes around the cells.
+  TerminalWindow.prototype.metrics = function () {
+    var cells = this.element.querySelector('.xterm-screen').getBoundingClientRect(),
+      frame = this.element.getBoundingClientRect();
+    return {
+      frame: frame,
+      cellWidth: cells.width / this.cols,
+      cellHeight: cells.height / this.rows,
+      spare: { x: frame.width - cells.width, y: frame.height - cells.height },
+    };
+  };
+
+  TerminalWindow.prototype.toggleMaximize = function () {
+    var el = this.element,
+      back = this.unmaximized;
+    if (back) {
+      this.unmaximized = null;
+      window.removeEventListener('resize', this.onViewportResize);
+      el.classList.remove('maximized');
+      el.style.left = back.left;
+      el.style.top = back.top;
+      this.resize(back.cols, back.rows);
+    } else {
+      this.unmaximized = {
+        left: el.style.left,
+        top: el.style.top,
+        cols: this.cols,
+        rows: this.rows,
+      };
+      window.addEventListener('resize', this.onViewportResize);
+      el.classList.add('maximized');
+      el.style.left = el.style.top = '';
+      this.fitViewport();
+    }
+    this.maximizeTab.textContent = back ? '□' : '❐';
+    this.maximizeTab.title = back ? 'Maximize' : 'Restore';
+    this.term.focus();
+  };
+
+  // As many whole cells as fit in the viewport, but at least 80x24.
+  TerminalWindow.prototype.fitViewport = function () {
+    var m = this.metrics(),
+      doc = document.documentElement;
+    this.resize(
+      Math.max(COLS, Math.floor((doc.clientWidth - m.spare.x) / m.cellWidth)),
+      Math.max(ROWS, Math.floor((doc.clientHeight - m.spare.y) / m.cellHeight)),
+    );
   };
 
   // Call onMove on every mouse move until the button is released, then give the
@@ -447,6 +554,7 @@
     this.closed = true;
     clearTimeout(this.resizeTimer);
     clearTimeout(this.restartTimer);
+    window.removeEventListener('resize', this.onViewportResize);
     this.stopTracking();
     if (this.element) this.element.remove();
     var emulator = this.emulator,
@@ -458,6 +566,7 @@
       this.themeTab =
       this.zoomInTab =
       this.zoomOutTab =
+      this.maximizeTab =
         null;
     if (emulator) {
       // destroy() also disposes of the terminal.
