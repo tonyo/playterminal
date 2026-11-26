@@ -50,7 +50,8 @@ locked in `mise.lock`), and uv installs the Python dependencies into `.venv`
    `docker compose` commands run against the local stack. `mise run down`
    stops it.
 
-   The pages are templates in `games/templates/games/`, and each Game is a
+   The pages are templates in `games/templates/games/` (being replaced by
+   the static Astro site in [`site/`](site/README.md)), and each Game is a
    TOML file in `games/library/` (see its README): nothing to load into the
    database. Play runs the Game's Command in v86
    inside the browser: nothing runs on the server.

@@ -15,6 +15,8 @@ node = "24.22.3"
 [env]
 _.python.venv = { path = ".venv", create = true }
 COMPOSE_FILE = "docker-compose.yaml:compose.local.yaml"
+# The static site (site/) is built with Astro; don't send Astro usage telemetry.
+ASTRO_TELEMETRY_DISABLED = "1"
 
 [tasks.setup]
 description = "Install the locked dependencies and the git pre-commit hooks"
@@ -39,6 +41,29 @@ description = "Run the tests"
 depends = ["sync"]
 env = { SECRET_KEY = "test" }
 run = "pytest tests/ -p no:cacheprovider"
+
+[tasks."site:install"]
+description = "Install the static site's locked npm dependencies"
+dir = "site"
+run = "npm ci --no-fund --no-audit"
+
+[tasks."site:dev"]
+description = "Serve the static site with live reload on http://localhost:4321 (VM files from vm/out)"
+depends = ["site:install"]
+dir = "site"
+run = "npx astro dev"
+
+[tasks."site:build"]
+description = "Build the static site into site/dist"
+depends = ["site:install"]
+dir = "site"
+run = "npx astro build"
+
+[tasks."site:test"]
+description = "Build the static site, then test it"
+depends = ["site:build"]
+dir = "site"
+run = "node --test"
 
 [tasks.up]
 description = "Build and start the local stack on http://localhost:8090, then migrate and collect static files"

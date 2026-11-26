@@ -1,0 +1,19 @@
+{
+  "name": "playterminal-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@xterm/addon-webgl": "0.19.0",
+    "@xterm/xterm": "6.0.0",
+    "astro": "7.4.13",
+    "markdown-it": "15.0.3"
+  },
+  "overrides": {
+    "@astrojs/compiler-binding": "0.5.2"
+  }
+}

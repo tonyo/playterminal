@@ -12,7 +12,10 @@
       "!**/*.min.js",
       "!**/*.min.css",
       "!vm/out",
-      "!vm/node_modules"
+      "!vm/node_modules",
+      "!site/node_modules",
+      "!site/dist",
+      "!site/.astro"
     ]
   },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
@@ -26,7 +29,7 @@
     {
       // The page scripts are plain scripts: function expressions (the bar's click handlers
       // rely on `this`) and string concatenation.
-      "includes": ["games/static/**"],
+      "includes": ["games/static/**", "site/src/scripts/**"],
       "linter": {
         "rules": {
           "complexity": { "useArrowFunction": "off" },

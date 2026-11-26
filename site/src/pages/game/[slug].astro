@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { allGames } from '../../lib/collection.js';
+import { gameConfig } from '../../lib/games.js';
+import { jsonScript } from '../../lib/json-script.js';
+import { renderMarkdown } from '../../lib/markdown.js';
+import { V86_BASE } from '../../lib/v86.js';
+
+// Every Game has a page, listed or not.
+export async function getStaticPaths() {
+  return (await allGames()).map((game) => ({ params: { slug: game.id }, props: { game } }));
+}
+
+const { game } = Astro.props;
+---
+
+<Base>
+  <h1>{game.data.name}</h1>
+  <br />
+  <div class="game-info" set:html={renderMarkdown(game.data.description)} />
+  <br />
+  <button id="open-terminal-btn" type="button" class="button">Play</button>
+  <br />
+  <br />
+  <div id="status-message" class="alert alert-danger" role="alert" hidden></div>
+  <script
+    id="game-config"
+    type="application/json"
+    is:inline
+    set:html={jsonScript(gameConfig(game, V86_BASE))}
+  />
+  <script>
+    import '../../scripts/game.js';
+  </script>
+</Base>

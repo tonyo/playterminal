@@ -11,3 +11,6 @@ nginx
 .ruff_cache
 .github
 vm
+site/node_modules
+site/dist
+site/.astro

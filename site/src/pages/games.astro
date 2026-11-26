@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { allGames } from '../lib/collection.js';
+import { displayedGames, gameUrl } from '../lib/games.js';
+
+const games = displayedGames(await allGames());
+---
+
+<Base>
+  <h1>All games</h1>
+  <hr />
+  {games.map((game) => <p><a href={gameUrl(game)}>{game.data.name}</a></p>)}
+  {games.length === 0 && 'No games.'}
+</Base>
