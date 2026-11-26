@@ -77,7 +77,7 @@ def test_unknown_game_is_404(games, client):
     assert client.get("/game/pong/").status_code == 404
 
 
-def test_game_detail_renders_command_into_js_config(client, settings, monkeypatch):
+def test_game_detail_renders_name_and_command_into_js_config(client, settings, monkeypatch):
     settings.V86_BASE_URL = "/vm/"
     game = catalog.Game(slug="robots", name="Robots", command="robots", refresh_code=12)
     monkeypatch.setattr(catalog, "all_games", lambda: (game,))
@@ -85,13 +85,14 @@ def test_game_detail_renders_command_into_js_config(client, settings, monkeypatc
     response = client.get(game.get_absolute_url())
 
     assert response.context["game_config"] == {
+        "name": "Robots",
         "command": "robots",
         "refreshCode": 12,
         "v86Base": "/vm/",
     }
     assert (
         '<script id="game-config" type="application/json">'
-        '{"command": "robots", "refreshCode": 12, "v86Base": "/vm/"}</script>'
+        '{"name": "Robots", "command": "robots", "refreshCode": 12, "v86Base": "/vm/"}</script>'
     ) in response.content.decode()
 
 

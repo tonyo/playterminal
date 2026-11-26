@@ -45,6 +45,7 @@ function openTerminal() {
   showStatus('Loading the game…', 'info');
   new TerminalWindow({
     base: gameConfig.v86Base,
+    name: gameConfig.name,
     command: gameConfig.command,
     refreshCode: gameConfig.refreshCode,
     onProgress: showProgress,

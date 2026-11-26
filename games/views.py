@@ -13,6 +13,7 @@ class GameDetailView(TemplateView):
         if game is None:
             raise Http404(f"No Game {slug!r}")
         game_config = {
+            "name": game.name,
             "command": game.command,
             "refreshCode": game.refresh_code,
             "v86Base": settings.V86_BASE_URL,

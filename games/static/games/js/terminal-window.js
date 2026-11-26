@@ -167,6 +167,7 @@
   /**
    * options:
    *   base         URL prefix of the VM files, ends in '/'
+   *   name         the Game's name, shown on the bar
    *   command      the Game's Command
    *   refreshCode  a key code sent after each launch, or null
    *   onProgress   download-progress events while the Snapshot loads
@@ -246,7 +247,7 @@
     });
     var bar = div('bar', [
       close,
-      div('title', this.options.command),
+      div('title', this.options.name),
       this.zoomOutTab,
       this.zoomInTab,
       this.themeTab,
