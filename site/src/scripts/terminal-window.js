@@ -13,12 +13,15 @@
  * opens, and again a second after READY follows END, so a finished Game
  * restarts in the same window. Only ✖ closes the window and destroys the emulator.
  *
- * The corner grip resizes the terminal in whole cells. The window sends the
- * new size as "<rows> <cols>" on serial1, where the guest sets ttyS0's size
- * and the Game gets SIGWINCH (vm/image/playterminal-resize). □ (or a
- * double-click on the bar) maximizes the window to fill the browser's viewport,
- * and ❐ puts it back. Not the Fullscreen API: there Esc leaves fullscreen, and
- * many Games need Esc.
+ * The terminal is always 80x24: Games draw for that size, and some (Robots)
+ * break when the size changes under them. Making the window bigger means
+ * bigger letters, never more cells: − and + step the font size, and □ (or a
+ * double-click on the bar) maximizes the window, picking the largest font at
+ * which 80x24 fits the browser's viewport, centered. ❐ puts it back. Not the
+ * Fullscreen API: there Esc leaves fullscreen, and many Games need Esc. (The
+ * guest can still resize ttyS0 from "<rows> <cols>" on serial1,
+ * vm/image/playterminal-resize, for a Game that handles resizing well; the
+ * window doesn't use it.)
  *
  * The terminal draws with WebGL when the browser can (xterm.js's WebGL addon),
  * which keeps up with full-screen redraws better than the default DOM renderer.
@@ -30,8 +33,7 @@
  * per emulator gives v86 a fresh JS realm and the stall goes away.
  */
 (function (window) {
-  // The terminal starts at this size and can't be resized below it: most
-  // terminal games need at least 80x24.
+  // The terminal's size, fixed: the size terminal games are written for.
   var ROWS = 24;
   var COLS = 80;
 
@@ -117,6 +119,8 @@
   // The font sizes the bar's − and + step through; the default is TERMINAL_OPTIONS'.
   var FONT_SIZES = [10, 12, 14, 16, 18, 20, 24];
   var FONT_SIZE_KEY = 'playterminal.fontSize';
+  // A maximized window on a small screen may go below FONT_SIZES, but not below this.
+  var MIN_FONT_SIZE = 6;
 
   function savedFontSize() {
     var size;
@@ -204,16 +208,13 @@
     this.emulator = null;
     this.element = null;
     this.term = null;
-    this.rows = ROWS;
-    this.cols = COLS;
     this.theme = null;
     this.themeTab = this.zoomInTab = this.zoomOutTab = this.maximizeTab = null;
-    this.unmaximized = null; // the position and size to go back to, while maximized
+    this.unmaximized = null; // the position and font size to go back to, while maximized
     this.onViewportResize = this.fitViewport.bind(this);
     this.closed = false;
     this.launched = false; // a Command is running
     this.tail = ''; // the last bytes from ttyS0, to spot END and READY
-    this.resizeTimer = null;
     this.restartTimer = null;
     this.start();
   }
@@ -291,11 +292,8 @@
       if (!ev.target.classList.contains('tab')) self.toggleMaximize();
     });
     var screen = div('screen');
-    var grip = div('grip');
-    grip.title = 'Resize';
-    this.element = document.body.appendChild(div('window', [bar, screen, grip]));
+    this.element = document.body.appendChild(div('window', [bar, screen]));
     this.draggable(bar);
-    this.resizable(grip);
 
     // v86 creates the terminal with its own options: add ours, keep the instance.
     function Terminal(options) {
@@ -353,24 +351,23 @@
     this.term.focus();
   };
 
+  // − and + are disabled at the ends of FONT_SIZES, and while maximized.
   TerminalWindow.prototype.setFontSize = function (size) {
     this.term.options.fontSize = size;
-    var i = FONT_SIZES.indexOf(size);
-    this.zoomOutTab.classList.toggle('disabled', i === 0);
-    this.zoomInTab.classList.toggle('disabled', i === FONT_SIZES.length - 1);
+    var i = FONT_SIZES.indexOf(size),
+      maximized = !!this.unmaximized;
+    this.zoomOutTab.classList.toggle('disabled', maximized || i === 0);
+    this.zoomInTab.classList.toggle('disabled', maximized || i === FONT_SIZES.length - 1);
   };
 
-  // Step the font size; the terminal keeps its rows and columns. The window grows or
-  // shrinks, so move it to keep the clicked button under the pointer for the next click.
-  // A maximized window instead keeps filling the viewport, with more or fewer cells.
+  // Step the font size. The window grows or shrinks, so move it to keep the clicked
+  // button under the pointer for the next click.
   TerminalWindow.prototype.zoom = function (step, tab) {
     var i = FONT_SIZES.indexOf(this.term.options.fontSize) + step,
       before,
       left;
-    if (i >= 0 && i < FONT_SIZES.length && this.unmaximized) {
-      this.setFontSize(FONT_SIZES[i]);
-      saveFontSize(FONT_SIZES[i]);
-      this.fitViewport();
+    if (this.unmaximized) {
+      // maximized: already as big as fits
     } else if (i >= 0 && i < FONT_SIZES.length) {
       before = tab.getBoundingClientRect().left;
       this.setFontSize(FONT_SIZES[i]);
@@ -399,48 +396,13 @@
     });
   };
 
-  // Resize the terminal by dragging the grip, in whole cells, within the page.
-  TerminalWindow.prototype.resizable = function (grip) {
-    var self = this;
-    grip.addEventListener('mousedown', function (ev) {
-      ev.preventDefault();
-      var m = self.metrics(),
-        frame = m.frame,
-        cellWidth = m.cellWidth,
-        cellHeight = m.cellHeight,
-        spare = m.spare,
-        start = { cols: self.cols, rows: self.rows, x: ev.pageX, y: ev.pageY },
-        maxCols = Math.max(
-          COLS,
-          Math.floor(
-            (document.documentElement.scrollWidth - (frame.left + window.scrollX) - spare.x) /
-              cellWidth,
-          ),
-        ),
-        // down to the bottom of the viewport
-        maxRows = Math.max(
-          ROWS,
-          Math.floor((document.documentElement.clientHeight - frame.top - spare.y) / cellHeight),
-        );
-      self.track(function (ev) {
-        var cols = start.cols + Math.round((ev.pageX - start.x) / cellWidth),
-          rows = start.rows + Math.round((ev.pageY - start.y) / cellHeight);
-        self.resize(
-          Math.min(maxCols, Math.max(COLS, cols)),
-          Math.min(maxRows, Math.max(ROWS, rows)),
-        );
-      });
-    });
-  };
-
-  // The window's box, a cell's size, and the room the frame takes around the cells.
+  // The window's box, the cells' box, and the room the frame takes around the cells.
   TerminalWindow.prototype.metrics = function () {
     var cells = this.element.querySelector('.xterm-screen').getBoundingClientRect(),
       frame = this.element.getBoundingClientRect();
     return {
       frame: frame,
-      cellWidth: cells.width / this.cols,
-      cellHeight: cells.height / this.rows,
+      cells: cells,
       spare: { x: frame.width - cells.width, y: frame.height - cells.height },
     };
   };
@@ -454,17 +416,15 @@
       el.classList.remove('maximized');
       el.style.left = back.left;
       el.style.top = back.top;
-      this.resize(back.cols, back.rows);
+      this.setFontSize(back.fontSize);
     } else {
       this.unmaximized = {
         left: el.style.left,
         top: el.style.top,
-        cols: this.cols,
-        rows: this.rows,
+        fontSize: this.term.options.fontSize,
       };
       window.addEventListener('resize', this.onViewportResize);
       el.classList.add('maximized');
-      el.style.left = el.style.top = '';
       this.fitViewport();
     }
     this.maximizeTab.textContent = back ? '□' : '❐';
@@ -472,14 +432,31 @@
     this.term.focus();
   };
 
-  // As many whole cells as fit in the viewport, but at least 80x24.
+  // The largest font size at which the 80x24 cells fit the viewport, and the window
+  // centered in it. On a small screen that may be smaller than FONT_SIZES allows.
   TerminalWindow.prototype.fitViewport = function () {
-    var m = this.metrics(),
-      doc = document.documentElement;
-    this.resize(
-      Math.max(COLS, Math.floor((doc.clientWidth - m.spare.x) / m.cellWidth)),
-      Math.max(ROWS, Math.floor((doc.clientHeight - m.spare.y) / m.cellHeight)),
+    var el = this.element,
+      doc = document.documentElement,
+      width = doc.clientWidth,
+      height = doc.clientHeight,
+      m = this.metrics(),
+      size = this.term.options.fontSize;
+    // Cells grow in proportion to the font size, give or take rounding.
+    size = Math.floor(
+      size * Math.min((width - m.spare.x) / m.cells.width, (height - m.spare.y) / m.cells.height),
     );
+    this.setFontSize(Math.max(MIN_FONT_SIZE, size));
+    m = this.metrics();
+    // The rounding may leave it a little too big.
+    while (
+      (m.frame.width > width || m.frame.height > height) &&
+      this.term.options.fontSize > MIN_FONT_SIZE
+    ) {
+      this.setFontSize(this.term.options.fontSize - 1);
+      m = this.metrics();
+    }
+    el.style.left = Math.max(0, Math.floor((width - m.frame.width) / 2)) + 'px';
+    el.style.top = Math.max(0, Math.floor((height - m.frame.height) / 2)) + 'px';
   };
 
   // Call onMove on every mouse move until the button is released, then give the
@@ -505,31 +482,11 @@
     this.tracking = null;
   };
 
-  TerminalWindow.prototype.resize = function (cols, rows) {
-    if (cols === this.cols && rows === this.rows) return;
-    this.cols = cols;
-    this.rows = rows;
-    this.term.resize(cols, rows);
-    // Tell the guest after the drag settles: each size is a SIGWINCH and a redraw.
-    var self = this;
-    clearTimeout(this.resizeTimer);
-    this.resizeTimer = setTimeout(function () {
-      if (self.emulator) {
-        self.emulator.serial_send_bytes(
-          1,
-          new TextEncoder().encode(self.rows + ' ' + self.cols + '\n'),
-        );
-      }
-    }, 100);
-  };
-
   TerminalWindow.prototype.launch = function () {
     this.launched = true;
     // Ctrl-U first: it drops anything typed while no Game was running, so the
     // launcher reads just this line.
-    this.emulator.serial0_send(
-      '\x15' + this.rows + ' ' + this.cols + ' ' + this.options.command + '\n',
-    );
+    this.emulator.serial0_send('\x15' + ROWS + ' ' + COLS + ' ' + this.options.command + '\n');
     if (this.options.refreshCode) {
       this.emulator.serial0_send(String.fromCharCode(this.options.refreshCode));
     }
@@ -559,7 +516,6 @@
   TerminalWindow.prototype.close = function () {
     if (this.closed) return;
     this.closed = true;
-    clearTimeout(this.resizeTimer);
     clearTimeout(this.restartTimer);
     window.removeEventListener('resize', this.onViewportResize);
     this.stopTracking();

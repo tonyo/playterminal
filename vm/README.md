@@ -3,8 +3,8 @@
 Builds the files PlayTerminal needs to run Games in the visitor's browser with the
 [v86](https://github.com/copy/v86) emulator: one i386 Alpine Linux VM Image holding the
 Games, and a Snapshot of it booted to a root shell on the serial console (ttyS0). The page
-restores the Snapshot and drives the Game over v86's `serial0`; it sends the terminal size
-on `serial1` (ttyS1) when the window is resized.
+restores the Snapshot and drives the Game over v86's `serial0`. A size sent on `serial1`
+(ttyS1) resizes ttyS0; the page keeps the terminal at 80x24 and doesn't use it.
 
 This directory came from the playterminal-images repo. Like the rest of PlayTerminal, it is
 under the MIT license ([LICENSE](../LICENSE)).

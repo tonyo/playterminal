@@ -55,46 +55,8 @@
   background: #000;
 }
 
-/* The resize grip in the bottom-right corner, over the screen's border. */
-.window .grip {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 14px;
-  height: 14px;
-  z-index: 20;
-  cursor: nwse-resize;
-  background: linear-gradient(
-    135deg,
-    transparent 0,
-    transparent 55%,
-    #888 55%,
-    #888 62%,
-    transparent 62%,
-    transparent 75%,
-    #888 75%,
-    #888 82%,
-    transparent 82%
-  );
-}
-
-.window .grip:hover {
-  background: linear-gradient(
-    135deg,
-    transparent 0,
-    transparent 55%,
-    #fafafa 55%,
-    #fafafa 62%,
-    transparent 62%,
-    transparent 75%,
-    #fafafa 75%,
-    #fafafa 82%,
-    transparent 82%
-  );
-}
-
-/* Maximized: pinned to the viewport's corner, the rest of the page blacked out
-   (the viewport is rarely a whole number of cells). */
+/* Maximized: centered in the viewport (terminal-window.js sets left and top), the rest
+   of the page blacked out: 80x24 rarely has the viewport's shape. */
 .window.maximized {
   position: fixed;
   top: 0;
@@ -104,10 +66,6 @@
 
 .window.maximized .bar {
   cursor: default;
-}
-
-.window.maximized .grip {
-  display: none;
 }
 
 /* CRT themes: phosphor glow, scanlines and a vignette over the terminal. */
