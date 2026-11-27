@@ -3,43 +3,56 @@ minimum_release_age = "7d"
 lockfile = true
 lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64"]
 
-# mise installs Python and uv; uv manages .venv from pyproject.toml and uv.lock.
 [tools]
-python = "3.14.10"
-uv = "0.13"
+# Builds and tests the site (site/), runs the VM checks (vm/) and the Biome hook.
+node = "24.22.3"
 # Runs the git hooks in .pre-commit-config.yaml.
 pre-commit = "4.7.0"
-# For the Biome hook (JS and CSS); same version as vm/.
-node = "24.22.3"
+# pre-commit ships as a .pyz and installs the ruff and djLint hooks into virtualenvs; also
+# serves vm/'s test page.
+python = "3.14.10"
 
 [env]
-_.python.venv = { path = ".venv", create = true }
 # The static site (site/) is built with Astro; don't send Astro usage telemetry.
 ASTRO_TELEMETRY_DISABLED = "1"
 
 [tasks.setup]
-description = "Install the locked dependencies and the git pre-commit hooks"
-depends = ["sync"]
+description = "Install the locked npm dependencies and the git pre-commit hooks"
+depends = ["site:install", "vm:install"]
 run = "pre-commit install"
 
 [tasks.lint]
-description = "Run the pre-commit hooks (ruff, Biome, djLint, YAML/JSON/TOML checks, whitespace) on every file"
+description = "Run the pre-commit hooks (Biome, ruff, djLint, YAML/JSON/TOML checks, whitespace) on every file"
 run = "pre-commit run --all-files"
 
-[tasks.format]
-description = "Format and fix the Python code with ruff"
-depends = ["sync"]
-run = ["ruff check --fix .", "ruff format ."]
-
-[tasks.sync]
-description = "Install the locked dependencies into .venv"
-run = "uv sync --locked"
-
 [tasks.test]
-description = "Run the tests"
-depends = ["sync"]
-env = { SECRET_KEY = "test" }
-run = "pytest tests/ -p no:cacheprovider"
+description = "Build the static site and run its tests"
+depends = ["site:test"]
+
+# The whole image.
+
+[tasks.image]
+description = "Build the whole image, tonyo/playterminal: VM Image, Snapshot (verified), site, nginx"
+run = "docker buildx bake -f docker-bake.hcl"
+
+[tasks.up]
+description = "Build the image and serve it on http://localhost:8090"
+depends = ["image"]
+run = """
+set -eu
+docker rm -f playterminal-local >/dev/null 2>&1 || true
+docker run -d --name playterminal-local -p 127.0.0.1:${PLAYTERMINAL_PORT:-8090}:80 tonyo/playterminal
+"""
+
+[tasks.smoke]
+description = "Check the running container (mise run up) over HTTP"
+run = "scripts/smoke-test.sh http://localhost:${PLAYTERMINAL_PORT:-8090}"
+
+[tasks.down]
+description = "Stop the local container"
+run = "docker rm -f playterminal-local"
+
+# The static site (site/).
 
 [tasks."site:install"]
 description = "Install the static site's locked npm dependencies"
@@ -64,27 +77,29 @@ depends = ["site:build"]
 dir = "site"
 run = "node --test"
 
-[tasks.image]
-description = "Build the whole image, tonyo/playterminal: VM Image, Snapshot (verified), site, nginx"
-run = "docker buildx bake -f docker-bake.hcl"
+# The VM Image and Snapshot (vm/). The build runs in Docker: the vm-* stages of Dockerfile.
 
-[tasks.up]
-description = "Build the image and serve it on http://localhost:8090"
-depends = ["image"]
+[tasks."vm:install"]
+description = "Install vm/'s locked npm dependencies (v86, for vm:verify and the test page)"
+dir = "vm"
+run = "npm ci --no-fund --no-audit"
+
+[tasks."vm:build"]
+description = "Build the VM Image and Snapshot in Docker, verify them there, and write them to vm/out"
 run = """
 set -eu
-docker rm -f playterminal-local >/dev/null 2>&1 || true
-docker run -d --name playterminal-local -p 127.0.0.1:${PLAYTERMINAL_PORT:-8090}:80 tonyo/playterminal
+mkdir -p vm/out
+find vm/out -mindepth 1 -delete
+docker buildx bake -f docker-bake.hcl vm-out
 """
 
-[tasks.smoke]
-description = "Check the running container (mise run up) over HTTP"
-run = "scripts/smoke-test.sh http://localhost:${PLAYTERMINAL_PORT:-8090}"
+[tasks."vm:verify"]
+description = "Restore vm/out's Snapshot in node and check the launcher, robots and every Command"
+depends = ["vm:install"]
+dir = "vm"
+run = "node scripts/verify.mjs"
 
-[tasks.down]
-description = "Stop the local container"
-run = "docker rm -f playterminal-local"
-
-[tasks.clean]
-description = "Delete compiled Python files"
-run = "find . -path ./.venv -prune -o \\( -name '*.pyc' -o -name '*.pyo' \\) -print -delete"
+[tasks."vm:serve"]
+description = "Serve vm/out and the test page on http://localhost:8087/test.html"
+dir = "vm"
+run = "python3 -m http.server --bind 127.0.0.1 -d . 8087"

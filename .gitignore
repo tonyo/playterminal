@@ -1,19 +1,17 @@
 .*.swp
-*.pyc
 .idea
-__pycache__
 .cache
-*.sqlite3
-collected_static/
-venv/
-.venv/
-local.py
+__pycache__
+.ruff_cache
 
 # Archives
 *.gz
 *.zip
 
-.env.local
-
 # Local notes, not committed
 .scratch/
+
+# Left over from the Django app: its secrets file, virtualenv and database.
+.env.local
+.venv/
+*.sqlite3

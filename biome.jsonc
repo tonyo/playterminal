@@ -7,8 +7,6 @@
       "**/*.js",
       "**/*.mjs",
       "**/*.css",
-      // Vendored files stay as upstream ships them.
-      "!games/static/games/vendor",
       "!**/*.min.js",
       "!**/*.min.css",
       "!vm/out",
@@ -22,14 +20,14 @@
   "linter": { "rules": { "preset": "recommended" } },
   "javascript": {
     "formatter": { "quoteStyle": "single" },
-    // Page globals: xterm.js, our TerminalWindow, the game_detail.html config and v86.
+    // Page globals: xterm.js, our TerminalWindow, the game page's config and v86.
     "globals": ["Terminal", "TerminalWindow", "gameConfig", "V86"]
   },
   "overrides": [
     {
       // The page scripts are plain scripts: function expressions (the bar's click handlers
       // rely on `this`) and string concatenation.
-      "includes": ["games/static/**", "site/src/scripts/**"],
+      "includes": ["site/src/scripts/**"],
       "linter": {
         "rules": {
           "complexity": { "useArrowFunction": "off" },

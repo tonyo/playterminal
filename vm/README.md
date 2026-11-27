@@ -11,16 +11,17 @@ under the MIT license ([LICENSE](../LICENSE)).
 
 ## Build
 
-Needs [mise](https://mise.jdx.dev) and Docker with buildx. The build runs in Docker: the
+Needs [mise](https://mise.jdx.dev) and Docker with buildx; the tasks are in the root
+`mise.toml` and run from anywhere in the repository. The build runs in Docker: the
 `vm-*` stages of the root [`Dockerfile`](../Dockerfile), wired up by
 [`docker-bake.hcl`](../docker-bake.hcl). The same stages go into the site's image, so the
 image always carries a verified VM build.
 
 ```sh
-mise run build     # build and verify in Docker, then write the result to out/
-mise run verify    # restore out/'s Snapshot in node; check the launcher, `robots`, resizing
-                   # and that every Command in ../games/library/*.toml is installed
-mise run serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
+mise run vm:build     # build and verify in Docker, then write the result to out/
+mise run vm:verify    # restore out/'s Snapshot in node; check the launcher, `robots`, resizing
+                      # and that every Command in ../games/*.toml is installed
+mise run vm:serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
 
 The stages, in order:
@@ -30,7 +31,7 @@ The stages, in order:
 | `guest` (`image/Dockerfile`, linux/386) | the VM Image: Alpine, the Games, the launcher |
 | `vm-image` | tars the guest's files and runs `scripts/convert-image.sh`: `fs.json`, `rootfs-flat/`, `THIRD-PARTY.txt` |
 | `vm-state` | `scripts/build-state.mjs` cold-boots it in node and saves the Snapshot; `scripts/stamp.mjs` names files by hash |
-| `vm-verify` | `scripts/verify.mjs` (also `mise run verify`) |
+| `vm-verify` | `scripts/verify.mjs` (also `mise run vm:verify`) |
 
 Only `vm-verify` reads the Games, so editing a Game's TOML doesn't rebuild the Snapshot. CI
 builds the whole image on every push, with the stages cached.

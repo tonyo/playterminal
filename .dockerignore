@@ -1,19 +1,15 @@
-# The image build (Dockerfile) reads games/library, nginx/, site/ and vm/ only.
+# The image build (Dockerfile) reads games/, nginx/, site/ and vm/ only.
 .git
 .github
 .claude
 .scratch
 .playwright-mcp
-.venv
 .env.local
+.venv
 data
 **/__pycache__
-**/*.pyc
-.pytest_cache
-.ruff_cache
-site/node_modules
+**/node_modules
 site/dist
 site/.astro
-vm/node_modules
 vm/out
 vm/.upstream

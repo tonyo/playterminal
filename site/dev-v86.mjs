@@ -1,4 +1,4 @@
-// `astro dev` only: serve the VM files from ../vm/out (built by `mise run build` in vm/) at
+// `astro dev` only: serve the VM files from ../vm/out (built by `mise run vm:build`) at
 // /v86/, as nginx does in the image. The build never copies them into dist/.
 import { createReadStream, statSync } from 'node:fs';
 import path from 'node:path';

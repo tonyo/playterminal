@@ -10,7 +10,7 @@ mise run site:build   # dist/
 mise run site:test    # build, then node:test (test/)
 ```
 
-- **Games:** one TOML file per Game in `../games/library/`. `src/content.config.js` checks each
+- **Games:** one TOML file per Game in `../games/`. `src/content.config.js` checks each
   file against a schema, and a bad file fails the build. Descriptions are Markdown, rendered by
   markdown-it with raw HTML off (`src/lib/markdown.js`).
 - **Pages:** `src/pages/`, with the layout in `src/layouts/Base.astro`. The game page's scripts
@@ -20,7 +20,7 @@ mise run site:test    # build, then node:test (test/)
 ## Dependencies
 
 Pinned exactly in `package.json`, locked in `package-lock.json`. `.npmrc` sets
-`min-release-age=7`, so npm only installs releases at least 7 days old (as mise and uv do).
+`min-release-age=7`, so npm only installs releases at least 7 days old (as mise does).
 
 - **Compiler pin:** `overrides` keeps `@astrojs/compiler-binding` at 0.5.2. Version 0.5.3 crashes
   with SIGILL on CPUs without AVX2

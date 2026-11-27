@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(here, '../dist');
-const library = path.join(here, '../../games/library');
+const library = path.join(here, '../../games');
 
 if (!existsSync(path.join(dist, 'index.html'))) {
   throw new Error('dist/ is missing: run `npm run build` first');

@@ -1,6 +1,7 @@
 # Installed by `mise run setup`; run on every file with `mise run lint`.
 # Upstream hooks are pinned by commit SHA, with the tag in a comment.
 repos:
+  # vm/scripts/third-party.py (config in ruff.toml).
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: ef6cf06c079dd6b299dfc720b0f14400c9d168e1 # v0.17.5
     hooks:
@@ -15,12 +16,10 @@ repos:
       - id: check-json
       - id: check-toml
       - id: check-merge-conflict
-      # Vendored files stay byte-for-byte as upstream ships them.
       - id: trailing-whitespace
         # Patches keep the space that marks a blank context line.
-        exclude: ^games/static/games/(vendor/|.*\.min\.(js|css)$)|\.patch$
+        exclude: \.patch$
       - id: end-of-file-fixer
-        exclude: ^games/static/games/(vendor/|.*\.min\.(js|css)$)
 
   # JS and CSS: lint, then format (config in biome.jsonc). Runs on the node from mise.toml.
   - repo: https://github.com/biomejs/pre-commit
@@ -30,9 +29,9 @@ repos:
         additional_dependencies: ["@biomejs/biome@2.6.8"]
         language_version: system
 
-  # Django templates and vm/test.html: format, then lint (config in pyproject.toml).
+  # vm/test.html: format, then lint (config in djlint.toml).
   - repo: https://github.com/djlint/djLint
     rev: 9cf2467f5e6af251156f9b08a7a78ed11a89cc1d # v1.50.0
     hooks:
-      - id: djlint-reformat-django
-      - id: djlint-django
+      - id: djlint-reformat
+      - id: djlint

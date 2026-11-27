@@ -59,11 +59,11 @@ RUN cp node_modules/v86/build/libv86.js node_modules/v86/build/v86.wasm \
 
 # Restore the Snapshot and check the launcher, robots and every Game's Command.
 FROM vm-state AS vm-verify
-COPY games/library/*.toml /src/games/library/
+COPY games/*.toml /src/games/
 COPY vm/scripts/verify.mjs scripts/
 RUN node scripts/verify.mjs
 
-# The verified VM files alone: `docker buildx bake vm-out` (vm/'s `mise run build`).
+# The verified VM files alone: `docker buildx bake vm-out` (`mise run vm:build`).
 FROM scratch AS vm-out
 COPY --from=vm-verify /src/vm/out/ /
 
@@ -74,7 +74,7 @@ ENV ASTRO_TELEMETRY_DISABLED=1
 WORKDIR /src/site
 COPY site/package.json site/package-lock.json site/.npmrc ./
 RUN npm ci --no-fund --no-audit
-COPY games/library/*.toml /src/games/library/
+COPY games/*.toml /src/games/
 COPY site/ ./
 RUN npx astro build && node --test
 

@@ -1,0 +1,5 @@
+# ruff lints and formats vm/scripts/third-party.py; run by the pre-commit hooks.
+line-length = 100
+
+[lint]
+select = ["E", "F", "I"]

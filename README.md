@@ -15,14 +15,13 @@ Dependencies: Docker (with buildx) and [mise](https://mise.jdx.dev).
 
 The site is static: [`site/`](site/README.md) is an Astro project that
 renders every page at build time from the Games, one TOML file per Game in
-`games/library/` (see its README). Play runs the Game's Command in v86 inside
-the browser: nothing runs on the server. The whole site ships as one nginx
-image, `tonyo/playterminal`, built by `Dockerfile` and `docker-bake.hcl`:
-the VM Image and Snapshot (built from `vm/` and verified in the build), the
-site (built and tested in the build), and the nginx config in
-`nginx/site.conf`.
+[`games/`](games/README.md). Play runs the Game's Command in v86 inside the
+browser: nothing runs on the server. The whole site ships as one nginx image,
+`tonyo/playterminal`, built by `Dockerfile` and `docker-bake.hcl`: the VM
+Image and Snapshot (built from `vm/` and verified in the build), the site
+(built and tested in the build), and the nginx config in `nginx/site.conf`.
 
-1. Run `mise install && mise run setup`: it installs the tools, the
+1. Run `mise install && mise run setup`: it installs the tools, the npm
    dependencies and the git pre-commit hooks (Biome for the JS and CSS in
    `biome.jsonc`, ruff, djLint, file checks).
 
@@ -31,17 +30,15 @@ site (built and tested in the build), and the nginx config in
    `mise run smoke` checks it over HTTP, `mise run down` stops it.
 
 3. Work on the pages with live reload: `mise run site:dev`. It serves the
-   VM files from `vm/out/`; build them once with `cd vm && mise run build`.
+   VM files from `vm/out/`; build them once with `mise run vm:build`.
 
-4. Run the tests: `mise run site:test` (the site) and `mise run test`. Run
-   every pre-commit hook on all files: `mise run lint`.
+4. Run the tests: `mise run test`. Run every pre-commit hook on all files:
+   `mise run lint`.
 
 Deploy: `docker buildx bake` builds `tonyo/playterminal`; push it, and the
 server runs it with `docker-compose.yaml`.
 
-The Django app (`games/`, `playterminal/`, `manage.py`) is no longer built
-or deployed, and will be removed.
-
-Dependency updates: change `pyproject.toml` if needed, then run `uv lock`
-(or `uv lock --upgrade`). Both uv (`exclude-newer`) and mise
-(`minimum_release_age`) only pick releases at least 7 days old.
+Dependency updates: npm (`site/`, `vm/`) only installs releases at least 7
+days old (`min-release-age` in `.npmrc`), and so does mise
+(`minimum_release_age`). The base images in `Dockerfile` are pinned by
+digest.

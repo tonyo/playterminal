@@ -6,7 +6,7 @@
 //     next line;
 //  5. "<rows> <cols>" on serial1 (ttyS1) resizes ttyS0 while a Command runs, and the
 //     Command gets SIGWINCH;
-//  6. every Game's Command in ../games/library/*.toml is installed;
+//  6. every Game's Command in ../games/*.toml is installed;
 //  7. tetris keeps drawing with no input: its drop timer fires, so the pieces fall;
 //  8. Ctrl-D does not make adventure loop on end of input.
 // Exits non-zero on failure.
@@ -106,17 +106,17 @@ console.log(`resize over ttyS1 -> ${JSON.stringify(resized)}: ok at ${secs()}`);
 
 // The program each Command runs: its first word, after any stty setup. The Game files are
 // plain enough that the command line can be read without a TOML parser.
-const library = path.join(here, "../../games/library");
+const library = path.join(here, "../../games");
 const programs = readdirSync(library)
   .filter((name) => name.endsWith(".toml"))
   .map((name) => {
     const m = readFileSync(path.join(library, name), "utf8").match(
       /^command = "(?:stty [^;"]*; )?([^\s";]+)[^"]*"/m,
     );
-    if (!m) fail(`no command line in games/library/${name}`);
+    if (!m) fail(`no command line in games/${name}`);
     return m[1];
   });
-if (programs.length === 0) fail("no Games found in games/library");
+if (programs.length === 0) fail("no Games found in games/");
 const found = await launch(
   `24 80 for p in ${programs.join(" ")}; do command -v $p >/dev/null || echo MISSING $p; done`,
 );

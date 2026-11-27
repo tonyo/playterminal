@@ -1,6 +1,6 @@
 # Run from the repository root:
 #   docker buildx bake          the image, tonyo/playterminal
-#   docker buildx bake vm-out   only the verified VM files, into vm/out (vm/'s `mise run build`)
+#   docker buildx bake vm-out   only the verified VM files, into vm/out (`mise run vm:build`)
 
 group "default" {
   targets = ["playterminal"]
