@@ -28,6 +28,12 @@ check() {
     fi
 }
 
+# A container that was just started may not be listening yet: wait up to 30 s.
+for _ in $(seq 30); do
+    curl -s -o /dev/null "$BASE/" && break
+    sleep 1
+done
+
 get /
 check "/ is 200" test "$(status)" = 200
 check "/ is the main page" grep -q '<title>PlayTerminal' "$TMP/b"
