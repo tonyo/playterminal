@@ -201,7 +201,15 @@ export class TerminalWindow {
     this.term = null;
     this.theme = null;
     this.unmaximized = null; // the position and font size to go back to, while maximized
-    this.onViewportResize = () => this.fitViewport();
+    // While maximized, refit on viewport resizes, at most once per frame: each new font
+    // size makes xterm.js measure and the WebGL renderer redraw its glyphs.
+    this.refitFrame = 0;
+    this.onViewportResize = () => {
+      this.refitFrame ||= requestAnimationFrame(() => {
+        this.refitFrame = 0;
+        if (this.unmaximized && !this.closed) this.fitViewport();
+      });
+    };
     this.closed = false;
     this.launched = false; // a Command is running
     this.tail = ''; // the last bytes from ttyS0, to spot END and READY
@@ -473,6 +481,7 @@ export class TerminalWindow {
     if (this.closed) return;
     this.closed = true;
     clearTimeout(this.restartTimer);
+    cancelAnimationFrame(this.refitFrame);
     window.removeEventListener('resize', this.onViewportResize);
     this.stopTracking();
     this.element?.remove();
