@@ -18,15 +18,6 @@ jobs:
       - name: Lint (all pre-commit hooks on every file)
         run: mise run lint
 
-  # The static site (site/): Astro build, then node:test on the code and on dist/.
-  site:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
-      - name: Build and test the site
-        run: mise run site:test
-
   # The whole image (docker-bake.hcl): VM Image, Snapshot and its verify, site build and
   # tests, nginx. Not pushed. The VM stages come from the gha cache unless vm/ changed.
   image:
