@@ -28,10 +28,3 @@ repos:
       - id: biome-check
         additional_dependencies: ["@biomejs/biome@2.6.8"]
         language_version: system
-
-  # vm/test.html: format, then lint (config in djlint.toml).
-  - repo: https://github.com/djlint/djLint
-    rev: 9cf2467f5e6af251156f9b08a7a78ed11a89cc1d # v1.50.0
-    hooks:
-      - id: djlint-reformat
-      - id: djlint

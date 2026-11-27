@@ -1,6 +1,0 @@
-# djLint formats and lints vm/test.html; run by the pre-commit hooks.
-profile = "html"
-indent = 2
-max_line_length = 100
-# H036 (no <br> for spacing): the page layout uses <br> deliberately.
-ignore = "H036"

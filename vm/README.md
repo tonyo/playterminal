@@ -21,7 +21,6 @@ image always carries a verified VM build.
 mise run vm:build     # build and verify in Docker, then write the result to out/
 mise run vm:verify    # restore out/'s Snapshot in node; check the launcher, `robots`, resizing
                       # and that every Command in ../games/*.toml is installed
-mise run vm:serve     # then open http://localhost:8087/test.html (raw serial0 output in a browser)
 ```
 
 The stages, in order:

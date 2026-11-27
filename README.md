@@ -23,7 +23,7 @@ Image and Snapshot (built from `vm/` and verified in the build), the site
 
 1. Run `mise install && mise run setup`: it installs the tools, the npm
    dependencies and the git pre-commit hooks (Biome for the JS and CSS in
-   `biome.jsonc`, ruff, djLint, file checks).
+   `biome.jsonc`, ruff, file checks).
 
 2. Build the image and serve it on http://localhost:8090: `mise run up`
    (the first build takes a few minutes; later ones reuse the Docker cache).

@@ -8,8 +8,8 @@ lockfile_platforms = ["linux-x64", "linux-arm64", "macos-arm64"]
 node = "24.22.3"
 # Runs the git hooks in .pre-commit-config.yaml.
 pre-commit = "4.7.0"
-# pre-commit ships as a .pyz and installs the ruff and djLint hooks into virtualenvs; also
-# serves vm/'s test page.
+# pre-commit ships as a .pyz and installs its Python hooks (ruff, the file checks) into
+# virtualenvs.
 python = "3.14.10"
 
 [env]
@@ -22,7 +22,7 @@ depends = ["site:install", "vm:install"]
 run = "pre-commit install"
 
 [tasks.lint]
-description = "Run the pre-commit hooks (Biome, ruff, djLint, YAML/JSON/TOML checks, whitespace) on every file"
+description = "Run the pre-commit hooks (Biome, ruff, YAML/JSON/TOML checks, whitespace) on every file"
 run = "pre-commit run --all-files"
 
 [tasks.test]
@@ -80,7 +80,7 @@ run = "node --test"
 # The VM Image and Snapshot (vm/). The build runs in Docker: the vm-* stages of Dockerfile.
 
 [tasks."vm:install"]
-description = "Install vm/'s locked npm dependencies (v86, for vm:verify and the test page)"
+description = "Install vm/'s locked npm dependencies (v86, for vm:verify)"
 dir = "vm"
 run = "npm ci --no-fund --no-audit"
 
@@ -98,8 +98,3 @@ description = "Restore vm/out's Snapshot in node and check the launcher, robots 
 depends = ["vm:install"]
 dir = "vm"
 run = "node scripts/verify.mjs"
-
-[tasks."vm:serve"]
-description = "Serve vm/out and the test page on http://localhost:8087/test.html"
-dir = "vm"
-run = "python3 -m http.server --bind 127.0.0.1 -d . 8087"
