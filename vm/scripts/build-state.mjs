@@ -9,11 +9,9 @@ import zlib from "node:zlib";
 import { V86 } from "v86";
 
 const out = `${path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../out")}/`;
-const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
+const { v86Options, snapshotUrl, READY } = await import(path.join(out, "config.mjs"));
 const target = snapshotUrl(out);
 
-// Printed by image/playterminal-launcher each time it waits for a line.
-const READY = "\x1b]777;playterminal;ready\x07";
 const QUIET_MS = 3000;
 const TIMEOUT_MS = 180_000;
 

@@ -15,11 +15,10 @@ import { V86 } from "v86";
 
 const here = path.dirname(url.fileURLToPath(import.meta.url));
 const out = `${path.join(here, "../out")}/`;
-const { v86Options, snapshotUrl, libv86Url } = await import(path.join(out, "config.mjs"));
+const { v86Options, snapshotUrl, libv86Url, READY, END } = await import(
+  path.join(out, "config.mjs")
+);
 
-// Printed by image/playterminal-launcher.
-const READY = "\x1b]777;playterminal;ready\x07";
-const END = "\x1b]777;playterminal;exit\x07";
 const TIMEOUT_MS = 30_000;
 const t0 = Date.now();
 const secs = () => `${((Date.now() - t0) / 1000).toFixed(2)} s`;

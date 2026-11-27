@@ -14,6 +14,12 @@ const VGABIOS = "vgabios.bin";
 const FS_JSON = "fs.json";
 const SNAPSHOT = "state.bin.zst";
 
+// What image/playterminal-launcher prints on ttyS0: READY when it waits for a launch line,
+// END when the Command exits. OSC sequences, which terminals don't display. The launcher
+// has its own copy; verify.mjs checks that they agree.
+export const READY = "\x1b]777;playterminal;ready\x07";
+export const END = "\x1b]777;playterminal;exit\x07";
+
 export function v86Options(base) {
   return {
     wasm_path: `${base}${WASM}`,

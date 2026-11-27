@@ -38,9 +38,6 @@ import '../styles/terminal-styles.css';
 const ROWS = 24;
 const COLS = 80;
 
-// Printed by the launcher.
-const END = '\x1b]777;playterminal;exit\x07';
-const READY = '\x1b]777;playterminal;ready\x07';
 // The pause before a finished Game starts again.
 const RESTART_DELAY_MS = 1000;
 
@@ -208,6 +205,7 @@ export class TerminalWindow {
     this.closed = false;
     this.launched = false; // a Command is running
     this.tail = ''; // the last bytes from ttyS0, to spot END and READY
+    this.markers = null; // END and READY, from config.mjs
     this.restartTimer = null;
     this.tracking = null;
     this.start().catch((err) => this.fail(err));
@@ -223,6 +221,7 @@ export class TerminalWindow {
       return;
     }
     this.frame = frame;
+    this.markers = { end: config.END, ready: config.READY };
     const emulator = new frame.contentWindow.V86({
       ...config.v86Options(base),
       initial_state: { url: config.snapshotUrl(base) },
@@ -449,13 +448,14 @@ export class TerminalWindow {
 
   output(chr) {
     if (this.closed) return;
-    this.tail = (this.tail + chr).slice(-READY.length);
+    const { end, ready } = this.markers;
+    this.tail = (this.tail + chr).slice(-Math.max(end.length, ready.length));
     if (this.launched) {
-      if (this.tail.endsWith(END)) {
+      if (this.tail.endsWith(end)) {
         this.launched = false;
         this.tail = '';
       }
-    } else if (this.tail === READY) {
+    } else if (this.tail.endsWith(ready)) {
       // The Game ended and the launcher waits for a line: start the next one.
       this.tail = '';
       this.launched = true; // ignore output until the launch
