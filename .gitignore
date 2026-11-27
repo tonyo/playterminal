@@ -1,12 +1,7 @@
 .*.swp
-.idea
 .cache
 __pycache__
 .ruff_cache
-
-# Archives
-*.gz
-*.zip
 
 # Local notes, not committed
 .scratch/

@@ -12,4 +12,3 @@ data
 site/dist
 site/.astro
 vm/out
-vm/.upstream
