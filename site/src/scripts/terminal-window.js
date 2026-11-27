@@ -41,12 +41,16 @@ const COLS = 80;
 // The pause before a finished Game starts again.
 const RESTART_DELAY_MS = 1000;
 
+// The site's own font (base-styles.css), so the window has the same size on every system.
+// Glyphs it lacks come from the fallbacks.
+const FONT = 'Droid Sans Mono';
+
 // Added to the options v86 creates its xterm.js terminal with.
 const TERMINAL_OPTIONS = {
   rows: ROWS,
   cols: COLS,
   convertEol: false, // the guest's tty already sends \r\n
-  fontFamily: '"DejaVu Sans Mono", "Liberation Mono", monospace',
+  fontFamily: `"${FONT}", "DejaVu Sans Mono", "Liberation Mono", monospace`,
   fontSize: 14,
   theme: { background: '#000000', foreground: '#f0f0f0' },
 };
@@ -223,7 +227,11 @@ export class TerminalWindow {
     const base = this.options.base;
     // config.mjs names the emulator files: they are named by content hash.
     const config = await import(/* @vite-ignore */ `${base}config.mjs`);
-    const frame = await createFrame(config.libv86Url(base));
+    // xterm.js measures the font when the terminal opens: have it loaded by then.
+    const [frame] = await Promise.all([
+      createFrame(config.libv86Url(base)),
+      document.fonts.load(`${TERMINAL_OPTIONS.fontSize}px "${FONT}"`),
+    ]);
     if (this.closed) {
       frame.remove();
       return;
