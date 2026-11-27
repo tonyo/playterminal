@@ -18,23 +18,8 @@
   },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "linter": { "rules": { "preset": "recommended" } },
-  "javascript": {
-    "formatter": { "quoteStyle": "single" },
-    // Page globals: xterm.js, our TerminalWindow, the game page's config and v86.
-    "globals": ["Terminal", "TerminalWindow", "gameConfig", "V86"]
-  },
+  "javascript": { "formatter": { "quoteStyle": "single" } },
   "overrides": [
-    {
-      // The page scripts are plain scripts: function expressions (the bar's click handlers
-      // rely on `this`) and string concatenation.
-      "includes": ["site/src/scripts/**"],
-      "linter": {
-        "rules": {
-          "complexity": { "useArrowFunction": "off" },
-          "style": { "useTemplate": "off" }
-        }
-      }
-    },
     {
       // The VM Image scripts are ES modules run by node, written with double quotes.
       "includes": ["vm/**"],

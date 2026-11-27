@@ -27,7 +27,7 @@ export function gameUrl(game) {
   return `/game/${game.id}/`;
 }
 
-// The config the game page passes to playterminal.js.
+// The config the game page passes to scripts/game.js.
 export function gameConfig(game, v86Base) {
   return {
     name: game.data.name,
