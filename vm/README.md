@@ -39,14 +39,15 @@ builds the whole image on every push, with the stages cached.
 
 | File | What |
 |---|---|
-| `libv86.js`, `v86.wasm` | emulator, from npm `v86@0.5.473` |
-| `seabios.bin`, `vgabios.bin` | BIOS files |
+| `libv86-<hash>.js`, `v86-<hash>.wasm` | emulator, from npm `v86@0.5.473` |
+| `seabios-<hash>.bin`, `vgabios-<hash>.bin` | BIOS files |
 | `fs-<hash>.json`, `rootfs-flat/` | the VM Image as v86 9p-over-HTTP (index + sha256-named zstd blobs, fetched on demand) |
 | `state-<hash>.bin.zst` | the Snapshot |
 | `THIRD-PARTY.txt` | licenses and source pointers for the emulator, BIOS files and every Alpine package in the VM Image (`scripts/third-party.py`, from the image's apk database) |
-| `config.mjs` | `v86Options(base)` and `snapshotUrl(base)`, which name the files above; the page must use these exact options or the Snapshot won't restore |
+| `config.mjs` | `v86Options(base)`, `snapshotUrl(base)` and `libv86Url(base)`, which name the files above; the page must use these exact options or the Snapshot won't restore |
 
-Serve `out/` as static files and, in the page:
+Serve `out/` as static files and, in the page, load the script at `libv86Url("./out/")`
+(it defines `V86`), then:
 
 ```js
 import { v86Options, snapshotUrl } from "./out/config.mjs";

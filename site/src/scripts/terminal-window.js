@@ -148,19 +148,20 @@
     document.body.appendChild(holder.firstChild);
   }
 
-  // A hidden iframe with libv86.js loaded; resolves to the iframe.
-  function createFrame(base) {
+  // A hidden iframe with the emulator script (libv86.js) at `src` loaded; resolves to the
+  // iframe.
+  function createFrame(src) {
     return new Promise(function (resolve, reject) {
       var frame = document.createElement('iframe');
       frame.style.display = 'none';
       frame.setAttribute('aria-hidden', 'true');
-      frame.srcdoc = '<!DOCTYPE html><script src="' + base + 'libv86.js"></script>';
+      frame.srcdoc = '<!DOCTYPE html><script src="' + src + '"></script>';
       frame.onload = function () {
         if (frame.contentWindow?.V86) {
           resolve(frame);
         } else {
           frame.remove();
-          reject(new Error('could not load ' + base + 'libv86.js'));
+          reject(new Error('could not load ' + src));
         }
       };
       document.body.appendChild(frame);
@@ -220,10 +221,16 @@
   TerminalWindow.prototype.start = function () {
     var self = this,
       base = this.options.base;
-    Promise.all([createFrame(base), import(base + 'config.mjs')])
+    // config.mjs names the emulator files: they are named by content hash.
+    import(base + 'config.mjs')
+      .then(function (config) {
+        return createFrame(config.libv86Url(base)).then(function (frame) {
+          return { frame: frame, config: config };
+        });
+      })
       .then(function (loaded) {
-        var frame = loaded[0],
-          config = loaded[1];
+        var frame = loaded.frame,
+          config = loaded.config;
         if (self.closed) {
           frame.remove();
           return;

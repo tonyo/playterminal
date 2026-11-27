@@ -3,17 +3,22 @@
 // `base` is the URL prefix (browser) or filesystem path (node) of the output dir,
 // ending in "/". The build copies this file into that dir next to the files it names.
 
-// The VM Image's index and the Snapshot. After the Snapshot is saved, scripts/stamp.mjs
-// renames both after their content hash (fs-<hash>.json, state-<hash>.bin.zst) and
-// rewrites these two lines in out/config.mjs, so a new build never reuses a cached copy.
+// The files this config names. After the Snapshot is saved, scripts/stamp.mjs renames
+// each after its content hash (e.g. state-<hash>.bin.zst) and rewrites these lines in
+// out/config.mjs, so a browser can cache them for good and a new build never reuses an
+// old one. Only config.mjs keeps its name.
+const LIBV86 = "libv86.js";
+const WASM = "v86.wasm";
+const SEABIOS = "seabios.bin";
+const VGABIOS = "vgabios.bin";
 const FS_JSON = "fs.json";
 const SNAPSHOT = "state.bin.zst";
 
 export function v86Options(base) {
   return {
-    wasm_path: `${base}v86.wasm`,
-    bios: { url: `${base}seabios.bin` },
-    vga_bios: { url: `${base}vgabios.bin` },
+    wasm_path: `${base}${WASM}`,
+    bios: { url: `${base}${SEABIOS}` },
+    vga_bios: { url: `${base}${VGABIOS}` },
     memory_size: 128 * 1024 * 1024,
     vga_memory_size: 8 * 1024 * 1024,
     filesystem: {
@@ -32,4 +37,9 @@ export function v86Options(base) {
 // URL/path of the Snapshot, relative to the same `base`.
 export function snapshotUrl(base) {
   return `${base}${SNAPSHOT}`;
+}
+
+// URL/path of the emulator script that defines V86, relative to the same `base`.
+export function libv86Url(base) {
+  return `${base}${LIBV86}`;
 }

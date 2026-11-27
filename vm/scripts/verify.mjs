@@ -10,14 +10,14 @@
 //  7. tetris keeps drawing with no input: its drop timer fires, so the pieces fall;
 //  8. Ctrl-D does not make adventure loop on end of input.
 // Exits non-zero on failure.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import url from "node:url";
 import { V86 } from "v86";
 
 const here = path.dirname(url.fileURLToPath(import.meta.url));
 const out = `${path.join(here, "../out")}/`;
-const { v86Options, snapshotUrl } = await import(path.join(out, "config.mjs"));
+const { v86Options, snapshotUrl, libv86Url } = await import(path.join(out, "config.mjs"));
 
 // Printed by image/playterminal-launcher.
 const READY = "\x1b]777;playterminal;ready\x07";
@@ -26,6 +26,12 @@ const TIMEOUT_MS = 30_000;
 const t0 = Date.now();
 const secs = () => `${((Date.now() - t0) / 1000).toFixed(2)} s`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// node boots npm v86; the page loads the libv86.js that config.mjs names instead.
+if (!existsSync(libv86Url(out))) {
+  console.error(`FAIL: config.mjs names ${libv86Url(out)}, which is missing`);
+  process.exit(1);
+}
 
 const emulator = new V86({ ...v86Options(out), initial_state: { url: snapshotUrl(out) } });
 

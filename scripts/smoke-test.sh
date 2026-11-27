@@ -69,15 +69,25 @@ get /v86/config.mjs
 check "/v86/config.mjs is JavaScript" \
     test "$(status) $(header Content-Type)" = "200 application/javascript; charset=utf-8"
 check "/v86/config.mjs revalidates" test "$(header Cache-Control)" = no-cache
+libv86=$(grep -o 'libv86-[0-9a-f]*\.js' "$TMP/b")
+wasm=$(grep -o '"v86-[0-9a-f]*\.wasm' "$TMP/b" | tr -d '"')
+seabios=$(grep -o 'seabios-[0-9a-f]*\.bin' "$TMP/b")
 fsjson=$(grep -o 'fs-[0-9a-f]*\.json' "$TMP/b")
 snapshot=$(grep -o 'state-[0-9a-f]*\.bin\.zst' "$TMP/b")
 
-get /v86/libv86.js -H 'Accept-Encoding: gzip'
-check "/v86/libv86.js is gzipped" test "$(header Content-Encoding)" = gzip
+get "/v86/$libv86" -H 'Accept-Encoding: gzip'
+check "/v86/$libv86 is JavaScript, gzipped, cached for good" \
+    test "$(header Content-Type) $(header Content-Encoding) $(header Cache-Control)" \
+    = "application/javascript; charset=utf-8 gzip max-age=315360000"
 
-get /v86/v86.wasm -H 'Accept-Encoding: gzip'
-check "/v86/v86.wasm is wasm, gzipped" \
-    test "$(header Content-Type) $(header Content-Encoding)" = "application/wasm gzip"
+get "/v86/$wasm" -H 'Accept-Encoding: gzip'
+check "/v86/$wasm is wasm, gzipped, cached for good" \
+    test "$(header Content-Type) $(header Content-Encoding) $(header Cache-Control)" \
+    = "application/wasm gzip max-age=315360000"
+
+get "/v86/$seabios"
+check "/v86/$seabios is 200 and cached for good" \
+    test "$(status) $(header Cache-Control)" = "200 max-age=315360000"
 
 get "/v86/$fsjson" -H 'Accept-Encoding: gzip'
 check "/v86/$fsjson is gzipped and cached for good" \

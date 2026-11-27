@@ -1,7 +1,7 @@
-// Rename out/'s VM Image index and Snapshot after their content hash and point
-// out/config.mjs at the new names: fs.json -> fs-<hash>.json, state.bin.zst ->
-// state-<hash>.bin.zst. A rebuild then changes those URLs, so no browser or CDN can
-// reuse a cached copy of the old ones; only config.mjs keeps its name.
+// Rename the files out/config.mjs names after their content hash and point config.mjs
+// at the new names: libv86.js -> libv86-<hash>.js, fs.json -> fs-<hash>.json, and so on.
+// A rebuild then changes those URLs, so no browser or CDN can reuse a cached copy of an
+// old one; only config.mjs keeps its name.
 // Safe to run again: it reads the current names from out/config.mjs, and deletes
 // stamped files that config.mjs no longer names.
 import { createHash } from "node:crypto";
@@ -14,6 +14,10 @@ const configPath = path.join(out, "config.mjs");
 let config = readFileSync(configPath, "utf8");
 
 const FILES = [
+  { constant: "LIBV86", prefix: "libv86-", suffix: ".js" },
+  { constant: "WASM", prefix: "v86-", suffix: ".wasm" },
+  { constant: "SEABIOS", prefix: "seabios-", suffix: ".bin" },
+  { constant: "VGABIOS", prefix: "vgabios-", suffix: ".bin" },
   { constant: "FS_JSON", prefix: "fs-", suffix: ".json" },
   { constant: "SNAPSHOT", prefix: "state-", suffix: ".bin.zst" },
 ];
