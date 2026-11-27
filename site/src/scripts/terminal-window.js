@@ -18,10 +18,7 @@
  * bigger letters, never more cells: − and + step the font size, and □ (or a
  * double-click on the bar) maximizes the window, picking the largest font at
  * which 80x24 fits the browser's viewport, centered. ❐ puts it back. Not the
- * Fullscreen API: there Esc leaves fullscreen, and many Games need Esc. (The
- * guest can still resize ttyS0 from "<rows> <cols>" on serial1,
- * vm/image/playterminal-resize, for a Game that handles resizing well; the
- * window doesn't use it.)
+ * Fullscreen API: there Esc leaves fullscreen, and many Games need Esc.
  *
  * The terminal draws with WebGL when the browser can (xterm.js's WebGL addon),
  * which keeps up with full-screen redraws better than the default DOM renderer.

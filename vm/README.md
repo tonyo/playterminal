@@ -3,8 +3,7 @@
 Builds the files PlayTerminal needs to run Games in the visitor's browser with the
 [v86](https://github.com/copy/v86) emulator: one i386 Alpine Linux VM Image holding the
 Games, and a Snapshot of it booted to a root shell on the serial console (ttyS0). The page
-restores the Snapshot and drives the Game over v86's `serial0`. A size sent on `serial1`
-(ttyS1) resizes ttyS0; the page keeps the terminal at 80x24 and doesn't use it.
+restores the Snapshot and drives the Game over v86's `serial0`.
 
 This directory came from the playterminal-images repo. Like the rest of PlayTerminal, it is
 under the MIT license ([LICENSE](../LICENSE)).
@@ -19,7 +18,7 @@ image always carries a verified VM build.
 
 ```sh
 mise run vm:build     # build and verify in Docker, then write the result to out/
-mise run vm:verify    # restore out/'s Snapshot in node; check the launcher, `robots`, resizing
+mise run vm:verify    # restore out/'s Snapshot in node; check the launcher, `robots`
                       # and that every Command in ../games/*.toml is installed
 ```
 
@@ -60,8 +59,8 @@ const emulator = new V86({ ...v86Options("./out/"), initial_state: { url: snapsh
   (Alpine's `bsd-games`, `nethack` and `words-en`, plus Greed 4.5 built from
   [source](https://gitlab.com/esr/greed) and Micro Tetris 1.4.0 built from
   [source](https://github.com/troglobit/tetris) with `image/micro-tetris-timer.patch`, each in
-  its own stage), a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login shell,
-  and `image/playterminal-resize` on ttyS1, which sets ttyS0's size.
+  its own stage), and a launcher on ttyS0 (`image/playterminal-launcher`) in place of a login
+  shell.
 - The BIOS files and v86's `fs2json.py` / `copy-to-sha256.py` are downloaded from
   [copy/v86](https://github.com/copy/v86) (BSD-2-Clause) at commit `315b2b0`, the source of
   npm `v86@0.5.473`, and checked against pinned sha256 sums (`ADD --checksum` in the root `Dockerfile`).

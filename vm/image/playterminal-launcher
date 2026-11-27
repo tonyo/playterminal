@@ -6,7 +6,6 @@
 #   guest -> page   the Command's output, then END when it exits
 # READY is printed whenever the launcher waits for a line; the Snapshot is taken
 # at the first one. Both markers are OSC sequences, which terminals don't display.
-# The size can change while the Command runs: see playterminal-resize (ttyS1).
 READY='\033]777;playterminal;ready\007'
 END='\033]777;playterminal;exit\007'
 

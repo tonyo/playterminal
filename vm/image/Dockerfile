@@ -41,9 +41,6 @@ RUN sed -i 's/getty 38400 tty1/agetty --autologin root tty1 linux/' /etc/inittab
 # ttyS0 carries the Games: the launcher reads "<rows> <cols> <command>" lines.
 COPY --chmod=755 playterminal-launcher /usr/local/bin/playterminal-launcher
 RUN echo 'ttyS0::respawn:/usr/local/bin/playterminal-launcher' >> /etc/inittab
-# ttyS1 resizes ttyS0: playterminal-resize reads "<rows> <cols>" lines.
-COPY --chmod=755 playterminal-resize /usr/local/bin/playterminal-resize
-RUN echo 'ttyS1::respawn:/usr/local/bin/playterminal-resize' >> /etc/inittab
 RUN echo "root:" | chpasswd
 
 RUN setup-hostname localhost
