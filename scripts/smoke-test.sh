@@ -98,7 +98,8 @@ check "/v86/$snapshot is 200, not gzipped, cached for good" \
     test "$(status) $(header Content-Encoding) $(header Cache-Control)" = "200  max-age=315360000"
 
 get /v86/THIRD-PARTY.txt
-check "/v86/THIRD-PARTY.txt is 200" test "$(status)" = 200
+check "/v86/THIRD-PARTY.txt is 200 and revalidates" \
+    test "$(status) $(header Cache-Control)" = "200 no-cache"
 
 if [[ $FAILED != 0 ]]; then
     echo "Smoke test failed"
