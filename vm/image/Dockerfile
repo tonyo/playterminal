@@ -6,7 +6,7 @@
 # rewrite), in its own stage and copy only the binary into the VM Image.
 FROM docker.io/i386/alpine:3.21.0 AS greed
 ARG GREED_COMMIT=79799d1ba4b1bbc30c13d2b6725ab5ce5dbc5c32
-RUN apk add build-base ncurses-dev git
+RUN apk add --no-cache build-base ncurses-dev git
 RUN git clone --depth 1 --branch 4.5 https://gitlab.com/esr/greed.git /src \
     && test "$(git -C /src rev-parse HEAD)" = "$GREED_COMMIT" \
     && make -C /src greed
@@ -15,7 +15,7 @@ RUN git clone --depth 1 --branch 4.5 https://gitlab.com/esr/greed.git /src \
 # build the same release, 1.4.0, with the fix in its own stage.
 FROM docker.io/i386/alpine:3.21.0 AS tetris
 ARG TETRIS_SHA512=034e85028ab71e050de14775da2538ed6f2e27db9ae095c32982d5d32effdf17643f68cb43d72ef176855c909f264e45b9b6ae05c39bfd240ae08277f4523c78
-RUN apk add build-base
+RUN apk add --no-cache build-base
 COPY micro-tetris-timer.patch /
 RUN wget -O /tetris.tar.gz https://github.com/troglobit/tetris/archive/1.4.0.tar.gz \
     && echo "$TETRIS_SHA512  /tetris.tar.gz" | sha512sum -c \
@@ -29,7 +29,7 @@ ENV KERNEL=virt
 # bsd-games: adventure, robots and hangman; words-en: hangman's word list.
 ENV ADDPKGS="bsd-games nethack words-en ncurses-libs ncurses-terminfo-base"
 
-RUN apk add openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
+RUN apk add --no-cache openrc alpine-base agetty alpine-conf linux-$KERNEL linux-firmware-none $ADDPKGS
 COPY --from=greed /src/greed /usr/bin/greed
 COPY --from=greed /src/COPYING /usr/share/licenses/greed/COPYING
 COPY --from=tetris /src/tetris /usr/bin/tetris
